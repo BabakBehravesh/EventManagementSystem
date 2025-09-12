@@ -17,26 +17,17 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 
-
-// Add services to the container.
 builder.Services.AddControllers();
-// You can likely remove AddRazorPages() if you aren't using any Razor Pages
-// builder.Services.AddRazorPages();
 
-// Register DbContext with SQLite
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Register ASP.NET Core Identity Services
-// NOTE: We are NOT using .AddDefaultTokenProviders() or .AddDefaultUI()
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders(); // Keep this if you plan to implement password reset later
+    .AddDefaultTokenProviders();
 
-// Configure JWT Settings
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
-// Add JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 var key = Encoding.ASCII.GetBytes(jwtSettings!.Secret);
 
