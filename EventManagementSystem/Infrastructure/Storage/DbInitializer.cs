@@ -34,7 +34,6 @@ namespace EventManagementSystem.Infrastructure.Storage
                 await userManager.AddToRoleAsync(adminUser, "EventCreator");
             }
 
-            // You could also seed a sample event here linked to adminUser.Id
         }
     }
 }

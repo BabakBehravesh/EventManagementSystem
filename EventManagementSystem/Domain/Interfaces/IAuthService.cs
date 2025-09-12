@@ -6,6 +6,5 @@ namespace EventManagementSystem.Domain.Interfaces
     {
         Task<AuthResult> RegisterAsync(RegisterRequest request);
         Task<AuthResult> LoginAsync(LoginRequest request);
-        Task SeedAdminUserAsync();
     }
 }
