@@ -30,9 +30,9 @@ public class EventServiceTests
 
         _fakeRegistrations = new List<Registration>
         {
-            new() { Id = 1, Name = "Alice", Email = "alice@email.com", EventId = 1, ParticipantId = "P0001" },
-            new() { Id = 2, Name = "Bob", Email = "bob@email.com", EventId = 1, ParticipantId = "P0002" },
-            new() { Id = 3, Name = "Charlie", Email = "charlie@email.com", EventId = 2, ParticipantId = "P0001"  }
+            new() { Id = 1, Name = "Alice", Email = "alice@email.com", EventId = 1},
+            new() { Id = 2, Name = "Bob", Email = "bob@email.com", EventId = 1},
+            new() { Id = 3, Name = "Charlie", Email = "charlie@email.com", EventId = 2 }
         };
 
         // Create mock DbSets
@@ -58,7 +58,7 @@ public class EventServiceTests
     public async Task GetEventParticipantsAsync_ExistingEventName_ReturnsParticipants()
     {
         // Arrange
-        var eventName = "Tech Conference";
+        var eventName = 1; //"Tech Conference";
 
         // Act
         var result = await _eventService.GetEventParticipantsAsync(eventName);
@@ -74,7 +74,7 @@ public class EventServiceTests
     public async Task GetEventParticipantsAsync_NonExistentEventName_ThrowsKeyNotFoundException()
     {
         // Arrange
-        var nonExistentEventName = "Non-Existent Event";
+        var nonExistentEventName = 10000; // "Non-Existent Event";
 
         // Act & Assert
         await Assert.ThrowsAsync<KeyNotFoundException>(() =>
@@ -96,7 +96,7 @@ public class EventServiceTests
         var creatorId = "test-user-id";
 
         // Act
-        var result = await _eventService.CreateEventAsync(newEvent, creatorId);
+        var result = await _eventService.CreateEventAsync(newEvent);
 
         // Assert
         result.Should().NotBeNull();

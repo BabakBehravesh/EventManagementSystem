@@ -14,7 +14,8 @@
             // Build configuration
             IConfiguration configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
+                .AddJsonFile("appsettings.json", optional: true)
+                .AddUserSecrets<ApplicationDbContextFactory>() // <-- Add this line
                 .Build();
 
             // Setup DbContextOptions
