@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace EventManagementSystem.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class Initialmigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -167,14 +167,14 @@ namespace EventManagementSystem.Migrations
                     Location = table.Column<string>(type: "TEXT", nullable: false),
                     StartTime = table.Column<DateTime>(type: "TEXT", nullable: false),
                     EndTime = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CreatorId = table.Column<string>(type: "TEXT", nullable: false)
+                    CreatedBy = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Events", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Events_AspNetUsers_CreatorId",
-                        column: x => x.CreatorId,
+                        name: "FK_Events_AspNetUsers_CreatedBy",
+                        column: x => x.CreatedBy,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -240,14 +240,20 @@ namespace EventManagementSystem.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Events_CreatorId",
+                name: "IX_Events_CreatedBy",
                 table: "Events",
-                column: "CreatorId");
+                column: "CreatedBy");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Registrations_EventId",
+                name: "IX_Events_Name_StartTime_Location",
+                table: "Events",
+                columns: new[] { "Name", "StartTime", "Location" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Registrations_EventId_Email",
                 table: "Registrations",
-                column: "EventId");
+                columns: new[] { "EventId", "Email" });
         }
 
         /// <inheritdoc />

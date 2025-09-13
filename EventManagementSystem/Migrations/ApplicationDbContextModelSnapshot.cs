@@ -17,7 +17,7 @@ namespace EventManagementSystem.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.8");
 
-            modelBuilder.Entity("EventManagementSystem.Models.ApplicationUser", b =>
+            modelBuilder.Entity("EventManagementSystem.Domain.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
@@ -81,13 +81,13 @@ namespace EventManagementSystem.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("EventManagementSystem.Models.Event", b =>
+            modelBuilder.Entity("EventManagementSystem.Domain.Models.Event", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("CreatorId")
+                    b.Property<string>("CreatedBy")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -111,12 +111,15 @@ namespace EventManagementSystem.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatorId");
+                    b.HasIndex("CreatedBy");
 
-                    b.ToTable("Events", (string)null);
+                    b.HasIndex("Name", "StartTime", "Location")
+                        .IsUnique();
+
+                    b.ToTable("Events");
                 });
 
-            modelBuilder.Entity("EventManagementSystem.Models.Registration", b =>
+            modelBuilder.Entity("EventManagementSystem.Domain.Models.Registration", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -139,9 +142,9 @@ namespace EventManagementSystem.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EventId");
+                    b.HasIndex("EventId", "Email");
 
-                    b.ToTable("Registrations", (string)null);
+                    b.ToTable("Registrations");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -272,20 +275,20 @@ namespace EventManagementSystem.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("EventManagementSystem.Models.Event", b =>
+            modelBuilder.Entity("EventManagementSystem.Domain.Models.Event", b =>
                 {
-                    b.HasOne("EventManagementSystem.Models.ApplicationUser", "Creator")
+                    b.HasOne("EventManagementSystem.Domain.Models.ApplicationUser", "Creator")
                         .WithMany()
-                        .HasForeignKey("CreatorId")
+                        .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Creator");
                 });
 
-            modelBuilder.Entity("EventManagementSystem.Models.Registration", b =>
+            modelBuilder.Entity("EventManagementSystem.Domain.Models.Registration", b =>
                 {
-                    b.HasOne("EventManagementSystem.Models.Event", "Event")
+                    b.HasOne("EventManagementSystem.Domain.Models.Event", "Event")
                         .WithMany("Registrations")
                         .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -305,7 +308,7 @@ namespace EventManagementSystem.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("EventManagementSystem.Models.ApplicationUser", null)
+                    b.HasOne("EventManagementSystem.Domain.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -314,7 +317,7 @@ namespace EventManagementSystem.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("EventManagementSystem.Models.ApplicationUser", null)
+                    b.HasOne("EventManagementSystem.Domain.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -329,7 +332,7 @@ namespace EventManagementSystem.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("EventManagementSystem.Models.ApplicationUser", null)
+                    b.HasOne("EventManagementSystem.Domain.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -338,14 +341,14 @@ namespace EventManagementSystem.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("EventManagementSystem.Models.ApplicationUser", null)
+                    b.HasOne("EventManagementSystem.Domain.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("EventManagementSystem.Models.Event", b =>
+            modelBuilder.Entity("EventManagementSystem.Domain.Models.Event", b =>
                 {
                     b.Navigation("Registrations");
                 });
