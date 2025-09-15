@@ -37,7 +37,7 @@ public class RegistrationsController : ControllerBase
 
     // POST: api/events/5/registrations
     [HttpPost]
-    [AllowAnonymous] // Or [Authorize(Roles = "EventParticipant")] if you require login to register
+    [AllowAnonymous] 
     public async Task<ActionResult<RegistrationResponse>> Register(int eventId, [FromBody] RegistrationRequest request)
     {
         // Map from API DTO to Domain Entity

@@ -5,6 +5,7 @@ using EventManagementSystem.Application.DTOs;
 using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Domain.Models;
 using EventManagementSystem.Infrastructure.Security;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -28,6 +29,7 @@ public class AuthController : ControllerBase
         _jwtTokenGenerator = jwtTokenGenerator;
     }
 
+    [Authorize(Roles = "EventCreator")]
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest model)
     {
@@ -36,7 +38,7 @@ public class AuthController : ControllerBase
 
         if (result.Succeeded)
         {
-            await _userManager.AddToRoleAsync(user, "EventParticipant");
+            await _userManager.AddToRoleAsync(user, "EventCreator");
             return Ok(new { Message = "User registered successfully!" });
         }
 
