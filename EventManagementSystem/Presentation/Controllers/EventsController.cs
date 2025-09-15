@@ -23,23 +23,48 @@ public class EventsController : ControllerBase
     public async Task<ActionResult<IEnumerable<EventResponse>>> GetEventsAsync()
     {
         var events = await _eventService.GetAllEventsAsync();
-        return Ok(events);
+        var result = events.Select(e => new EventResponse(
+            e.Id,
+            e.Name,
+            e.Description,
+            e.Location,
+            e.StartTime,
+            e.EndTime));
+
+         return Ok(result);
     }
 
-    [HttpGet]
+    [HttpGet("{eventId}")]
     public async Task<ActionResult<EventResponse>> GetEventByIdAsync(int eventId)
     {
         var eventObject = await _eventService.GetEventByIdAsync(eventId);
-        return Ok(eventObject);
+        var eventResponse = new EventResponse
+        (
+            eventObject.Id,
+            eventObject.Name,
+            eventObject.Description,
+            eventObject.Location,
+            eventObject.StartTime,
+            eventObject.EndTime
+        );
+        return Ok(eventResponse);
     }
 
-    [HttpGet("participants/{eventName}")]
+    [HttpGet("participants/{eventId}")]
     [Authorize(Roles = "EventCreator")]
     public async Task<ActionResult<IEnumerable<RegistrationResponse>>> GetEventParticipantsByEventId(int eventId)
     {
         try
         {
             var participants = await _eventService.GetEventParticipantsAsync(eventId);
+            var result = participants.Select(p => new RegistrationResponse(
+                p.Id,
+                p.Name,
+                p.PhoneNumber,
+                p.Email,
+                p.EventId,
+                EventName: p.Event!.Name));
+
             return Ok(participants);
         }
         catch (KeyNotFoundException ex)
@@ -86,7 +111,7 @@ public class EventsController : ControllerBase
             );
 
             // Assuming you have a GetEventById endpoint
-            return CreatedAtAction(nameof(GetEventByIdAsync), new { id = createdEvent.Id }, eventResponse);
+            return Created();
         }
         catch (Exception ex)
         {

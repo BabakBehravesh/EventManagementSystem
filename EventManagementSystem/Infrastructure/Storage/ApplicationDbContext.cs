@@ -35,7 +35,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasOne(r => r.Event)
             .WithMany(e => e.Registrations)
             .HasForeignKey(r => r.EventId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Registration>()
             .HasIndex(r => new { r.EventId, r.Email });

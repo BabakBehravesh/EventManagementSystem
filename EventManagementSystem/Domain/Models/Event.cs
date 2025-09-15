@@ -13,7 +13,7 @@ namespace EventManagementSystem.Domain.Models
         public DateTime EndTime { get; set; }
 
         public required string CreatedBy { get; set; } 
-        public ApplicationUser? Creator { get; set; } // Navigation property to the user
+        public ApplicationUser? Creator { get; set; } 
         public Collection<Registration> Registrations { get; set; } = [];
     }
 }

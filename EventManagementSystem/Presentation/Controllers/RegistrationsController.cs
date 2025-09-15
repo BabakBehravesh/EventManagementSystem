@@ -23,7 +23,16 @@ public class RegistrationsController : ControllerBase
     public async Task<ActionResult<IEnumerable<RegistrationResponse>>> GetRegistrationsForEvent(int eventId)
     {
         var registrations = await _registrationService.GetRegistrationsForEventAsync(eventId);
-        return Ok(registrations);
+        var result = registrations.Select(r => 
+                new RegistrationResponse(
+                    r.Id,
+                    r.Name,
+                    r.PhoneNumber,
+                    r.Email,
+                    r.EventId,
+                    EventName: r.Event!.Name));
+
+        return Ok(result);
     }
 
     // POST: api/events/5/registrations
