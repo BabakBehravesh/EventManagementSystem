@@ -37,7 +37,7 @@ public class RegistrationsController : ControllerBase
 
     // POST: api/events/5/registrations
     [HttpPost]
-    [AllowAnonymous] 
+    [AllowAnonymous]
     public async Task<ActionResult<RegistrationResponse>> Register(int eventId, [FromBody] RegistrationRequest request)
     {
         // Map from API DTO to Domain Entity
@@ -51,6 +51,8 @@ public class RegistrationsController : ControllerBase
         
 
         var result = await _registrationService.RegisterForEventAsync(eventId, registrationEntity);
+
+        if (!result.Success) return BadRequest();
 
         // Map from Domain Entity back to API Response DTO
         var response = new RegistrationResponse(

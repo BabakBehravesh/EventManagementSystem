@@ -31,8 +31,8 @@ dotnet run
 
 ### Default Admin Login
 
-- **Email**: `admin@docuware.com`  
-- **Password**: `AdminPassword123!`  
+- **Email**: `Dev:FromSecretManager, Prod:AzureKeyVault`   
+- **Password**: `Dev:FromSecretManager, Prod:AzureKeyVault`  
 
 
 ## API Endpoints

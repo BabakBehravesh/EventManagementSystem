@@ -21,6 +21,10 @@ public class RegistrationService : IRegistrationService
         if (eventEntity == null)
             return new RegistrationResult(false, Message: "Event not found.");
 
+        var alreadyRegistered = await _context.Registrations.AnyAsync(r => r.EventId == eventId && r.Email == registration.Email.ToLower());
+        if (alreadyRegistered)
+            return new RegistrationResult(false, Message: "You have been already refistered to this event.");
+
         registration.EventId = eventId; 
         _context.Registrations.Add(registration);
         await _context.SaveChangesAsync();

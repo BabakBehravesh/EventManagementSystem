@@ -1,4 +1,3 @@
-using System.Text;
 using EventManagementSystem.Application.Services;
 using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Domain.Models;
@@ -6,12 +5,42 @@ using EventManagementSystem.Infrastructure.Security;
 using EventManagementSystem.Infrastructure.Storage;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+    .AddEnvironmentVariables();
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddUserSecrets<Program>();
+}
+
+// CORS Configuration - FIXED: Provide fallback values
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()!;
+//    ?? new[] { "http://localhost:4200", "https://localhost:4200" }; // Fallback values
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowUIApp",
+        policy =>
+        {
+            policy.WithOrigins(allowedOrigins)
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        }
+    );
+});
+
+// ... rest of your service registrations remain the same
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEventService, EventService>();
@@ -38,7 +67,7 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    options.RequireHttpsMetadata = false; // Set to true in production!
+    options.RequireHttpsMetadata = false;
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -49,23 +78,18 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidAudience = jwtSettings.Audience,
         ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero // Optional: reduce clock skew for exact expiration validation
+        ClockSkew = TimeSpan.Zero
     };
 });
 
-// Add Authorization policies (e.g., require specific roles)
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("RequireEventCreatorRole", policy => policy.RequireRole("EventCreator"));
-    // options.AddPolicy("RequireParticipantRole", policy => policy.RequireRole("EventParticipant"));
 });
 
-// Swagger configuration
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Event Registration API", Version = "v1" });
-
-    // Add JWT Bearer definition to Swagger
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
@@ -74,7 +98,6 @@ builder.Services.AddSwaggerGen(c =>
         Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
     });
-
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -93,18 +116,16 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Initialize the database (seed roles and admin user)
+// Initialize database
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-
     try
     {
-        // Ensure the database is created and migrated first
         var context = services.GetRequiredService<ApplicationDbContext>();
-        context.Database.Migrate(); // Applies any pending migrations
+        
+        context.Database.Migrate();
 
-        // Now seed the database with initial data
         await DbInitializer.Initialize(services);
     }
     catch (Exception ex)
@@ -115,20 +136,26 @@ using (var scope = app.Services.CreateScope())
 }
 
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+// FIXED: Correct middleware order
 app.UseHttpsRedirection();
 
-// The order of these two lines is VITAL: UseAuthentication before UseAuthorization
+// ADD THIS: Explicit routing middleware
+app.UseRouting();
+
+// MOVED: CORS must be after UseRouting() and before UseAuthentication()
+app.UseCors("AllowUIApp");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-// app.MapRazorPages(); // Remove if you don't need Razor Pages
 
 app.Run();
+
+

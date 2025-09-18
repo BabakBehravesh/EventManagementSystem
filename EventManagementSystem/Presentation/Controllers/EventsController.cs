@@ -2,12 +2,14 @@
 using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace EventManagementSystem.Controllers;
 
 [ApiController]
+[EnableCors(PolicyName = "AllowUIApp")]
 [Route("api/[controller]")]
 public class EventsController : ControllerBase
 {

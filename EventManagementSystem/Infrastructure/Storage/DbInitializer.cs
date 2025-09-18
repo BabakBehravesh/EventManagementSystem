@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using EventManagementSystem.Domain.Models; // Make sure this namespace contains ApplicationUser
+using EventManagementSystem.Domain.Models; 
 
 namespace EventManagementSystem.Infrastructure.Storage
 {
@@ -16,7 +14,6 @@ namespace EventManagementSystem.Infrastructure.Storage
 
                 logger.LogInformation("Starting database initialization...");
 
-                // Use ApplicationUser instead of IdentityUser
                 var roleManager = scopedServices.GetRequiredService<RoleManager<IdentityRole>>();
                 var userManager = scopedServices.GetRequiredService<UserManager<ApplicationUser>>();
                 var configuration = scopedServices.GetRequiredService<IConfiguration>();
@@ -34,9 +31,9 @@ namespace EventManagementSystem.Infrastructure.Storage
                 }
 
                 // Get admin credentials from configuration (Secret Manager)
-                var adminUserName = configuration["AdminCredentials:UserName"];
-                var adminEmail = configuration["AdminCredentials:Email"];
-                var adminPassword = configuration["AdminCredentials:Password"];
+                var adminUserName = configuration["DefaultAdminCredentials:UserName"];
+                var adminEmail = configuration["DefaultAdminCredentials:Email"];
+                var adminPassword = configuration["DefaultAdminCredentials:Password"];
 
                 // Validate that credentials exist
                 if (string.IsNullOrEmpty(adminUserName) ||
@@ -74,7 +71,6 @@ namespace EventManagementSystem.Infrastructure.Storage
                 }
                 else
                 {
-                    // Log errors if user creation fails
                     var errors = string.Join(", ", result.Errors.Select(e => e.Description));
                     throw new InvalidOperationException($"Failed to create admin user: {errors}");
                 }

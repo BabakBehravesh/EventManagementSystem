@@ -38,6 +38,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Registration>()
-            .HasIndex(r => new { r.EventId, r.Email });
+            .HasIndex(r => new { r.EventId, r.Email })
+            .IsUnique();
     }
 }
