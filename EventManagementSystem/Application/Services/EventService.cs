@@ -1,5 +1,4 @@
-﻿using EventManagementSystem.Application.DTOs;
-using EventManagementSystem.Domain.Interfaces;
+﻿using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Domain.Models;
 using EventManagementSystem.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +10,6 @@ public class EventService : IEventService
 {
     private readonly ApplicationDbContext _context;
 
-    // DbContext is injected here. The service depends on the abstraction (DbContext), not the implementation.
     public EventService(ApplicationDbContext context)
     {
         _context = context;
@@ -42,7 +40,6 @@ public class EventService : IEventService
 
         if (eventObject == null)
         {
-            // Throw exceptions for flow control in the service layer, let the controller handle HTTP codes.
             throw new KeyNotFoundException($"Event with Id '{eventId}' not found");
         }
 

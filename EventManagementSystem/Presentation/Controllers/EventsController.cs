@@ -1,4 +1,5 @@
 ﻿using EventManagementSystem.Application.DTOs;
+using EventManagementSystem.Application.Types;
 using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -15,15 +16,20 @@ public class EventsController : ControllerBase
 {
     private readonly IEventService _eventService;
 
-    // The controller now depends on the service interface, not the DbContext.
     public EventsController(IEventService eventService)
     {
         _eventService = eventService;
     }
 
     [HttpGet]
+    [Authorize(Roles = "EventParticipant")]
     public async Task<ActionResult<IEnumerable<EventResponse>>> GetEventsAsync()
     {
+        if (!ModelState.IsValid)
+        {  
+            return BadRequest(ModelState); 
+        }
+
         var events = await _eventService.GetAllEventsAsync();
         var result = events.Select(e => new EventResponse(
             e.Id,
@@ -37,9 +43,14 @@ public class EventsController : ControllerBase
     }
 
     [HttpGet("{eventId}")]
+    [Authorize(Roles = "EventParticipant")]
     public async Task<ActionResult<EventResponse>> GetEventByIdAsync(int eventId)
     {
+
         var eventObject = await _eventService.GetEventByIdAsync(eventId);
+        if (eventObject == null)
+            return NotFound();
+
         var eventResponse = new EventResponse
         (
             eventObject.Id,
@@ -79,7 +90,11 @@ public class EventsController : ControllerBase
     [Authorize(Roles = "EventCreator")]
     public async Task<ActionResult<EventResponse>> CreateEventAsync(EventRequest newEvent)
     {
-        // Get the user's ID from the JWT token (HTTP concern)
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (string.IsNullOrEmpty(userId))
@@ -89,7 +104,6 @@ public class EventsController : ControllerBase
 
         try
         {
-            // Mapping: Create an Event entity from the EventRequest DTO
             var eventEntity = new Event
             {
                 Name = newEvent.Name,
@@ -97,12 +111,11 @@ public class EventsController : ControllerBase
                 Location = newEvent.Location,
                 StartTime = newEvent.StartTime,
                 EndTime = newEvent.EndTime,
-                CreatedBy = userId // Set the creator from the token, NOT from the request
+                CreatedBy = userId 
             };
 
             var createdEvent = await _eventService.CreateEventAsync(eventEntity);
 
-            // Map the created Event entity back to an EventResponse DTO
             var eventResponse = new EventResponse(
                 createdEvent.Id,
                 createdEvent.Name,
@@ -112,7 +125,6 @@ public class EventsController : ControllerBase
                 createdEvent.EndTime
             );
 
-            // Assuming you have a GetEventById endpoint
             return Created();
         }
         catch (Exception ex)

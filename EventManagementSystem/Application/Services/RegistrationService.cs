@@ -1,10 +1,9 @@
 ﻿namespace EventManagementSystem.Application.Services;
 
 using EventManagementSystem.Domain.Interfaces;
-using global::EventManagementSystem.Domain.Models;
-using global::EventManagementSystem.Infrastructure.Storage;
+using EventManagementSystem.Domain.Models;
+using EventManagementSystem.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
-
 
 public class RegistrationService : IRegistrationService
 {

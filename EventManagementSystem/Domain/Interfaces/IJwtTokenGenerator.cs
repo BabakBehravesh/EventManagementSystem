@@ -1,9 +1,8 @@
 ﻿using EventManagementSystem.Domain.Models;
 
-namespace EventManagementSystem.Domain.Interfaces
+namespace EventManagementSystem.Domain.Interfaces;
+
+public interface IJwtTokenGenerator
 {
-    public interface IJwtTokenGenerator
-    {
-        string GenerateToken(ApplicationUser user, IList<string> roles);
-    }
+    string GenerateToken(ApplicationUser user, IList<string> roles);
 }

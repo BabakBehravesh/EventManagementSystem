@@ -23,7 +23,6 @@ if (builder.Environment.IsDevelopment())
     builder.Configuration.AddUserSecrets<Program>();
 }
 
-// CORS Configuration - FIXED: Provide fallback values
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()!;
 //    ?? new[] { "http://localhost:4200", "https://localhost:4200" }; // Fallback values
 
@@ -40,11 +39,11 @@ builder.Services.AddCors(options =>
     );
 });
 
-// ... rest of your service registrations remain the same
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
+builder.Services.AddScoped<DbInitializer>();
 
 builder.Services.AddControllers();
 
@@ -82,10 +81,6 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("RequireEventCreatorRole", policy => policy.RequireRole("EventCreator"));
-});
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -123,10 +118,10 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
-        
         context.Database.Migrate();
 
-        await DbInitializer.Initialize(services);
+        var initializer = services.GetRequiredService<DbInitializer>();
+        await initializer.Initialize(services);
     }
     catch (Exception ex)
     {
@@ -142,13 +137,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// FIXED: Correct middleware order
 app.UseHttpsRedirection();
 
-// ADD THIS: Explicit routing middleware
 app.UseRouting();
 
-// MOVED: CORS must be after UseRouting() and before UseAuthentication()
 app.UseCors("AllowUIApp");
 
 app.UseAuthentication();

@@ -2,9 +2,9 @@
 {
     using System.Linq;
     using System.Threading.Tasks;
-    using global::EventManagementSystem.Application.Services;
-    using global::EventManagementSystem.Domain.Models;
-    using global::EventManagementSystem.Infrastructure.Storage;
+    using EventManagementSystem.Application.Services;
+    using EventManagementSystem.Domain.Models;
+    using EventManagementSystem.Infrastructure.Storage;
     using Microsoft.EntityFrameworkCore;
     using Xunit;
 
@@ -42,8 +42,7 @@
             // Arrange
             using var context = GetInMemoryDbContext(nameof(RegisterForEventAsync_AlreadyRegistered_ReturnsFailure));
 
-            var ev = new Event { Id = 1, Name = "Test Event", CreatedBy = "1" };
-            context.Events.Add(ev);
+            context.Events.Add(new Event { Id = 1, Name = "Test Event", CreatedBy = "1" });
             context.Registrations.Add(new Registration { EventId = 1, Email = "test@example.com", Name = "Existing User" });
             await context.SaveChangesAsync();
 

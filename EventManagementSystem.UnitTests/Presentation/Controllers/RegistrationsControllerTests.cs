@@ -2,7 +2,6 @@
 using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Domain.Models;
 using FluentAssertions;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -207,7 +206,7 @@ public class RegistrationsControllerTests
                 It.Is<Registration>(r =>
                     r.Name == request.Name &&
                     r.Email == request.Email &&
-                    r.PhoneNumber == string.Empty))) // Should be empty string, not null
+                    r.PhoneNumber == string.Empty))) 
             .ReturnsAsync(registrationResult);
 
         // Act
@@ -296,5 +295,3 @@ public class RegistrationsControllerTests
             eventId, It.IsAny<Registration>()), Times.Once);
     }
 }
-
-// Supporting classes for tests

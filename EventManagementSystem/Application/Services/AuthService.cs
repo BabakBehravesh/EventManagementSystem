@@ -1,9 +1,7 @@
 ﻿using EventManagementSystem.Application.DTOs;
 using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Domain.Models;
-using EventManagementSystem.Infrastructure.Security;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
 
 namespace EventManagementSystem.Application.Services
 {
