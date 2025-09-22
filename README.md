@@ -90,3 +90,6 @@ Presentation/   # API controllers
 - ASP.NET Core Identity
 - JWT Bearer Authentication
 - SQLite
+
+## Secret Inclusion
+The secret file is included just for sake of Demo purposes. By right it should be stored on secure Key Vaults.
