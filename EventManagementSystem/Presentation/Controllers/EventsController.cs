@@ -22,7 +22,7 @@ public class EventsController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Roles = "EventParticipant")]
+    [Authorize]
     public async Task<ActionResult<IEnumerable<EventResponse>>> GetEventsAsync()
     {
         if (!ModelState.IsValid)
@@ -43,7 +43,7 @@ public class EventsController : ControllerBase
     }
 
     [HttpGet("{eventId}")]
-    [Authorize(Roles = "EventParticipant")]
+    [Authorize]
     public async Task<ActionResult<EventResponse>> GetEventByIdAsync(int eventId)
     {
 
@@ -63,30 +63,7 @@ public class EventsController : ControllerBase
         return Ok(eventResponse);
     }
 
-    [HttpGet("participants/{eventId}")]
-    [Authorize(Roles = "EventCreator")]
-    public async Task<ActionResult<IEnumerable<RegistrationResponse>>> GetEventParticipantsByEventId(int eventId)
-    {
-        try
-        {
-            var participants = await _eventService.GetEventParticipantsAsync(eventId);
-            var result = participants.Select(p => new RegistrationResponse(
-                p.Id,
-                p.Name,
-                p.PhoneNumber,
-                p.Email,
-                p.EventId,
-                EventName: p.Event!.Name));
-
-            return Ok(participants);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
-    }
-
-    [HttpPost]
+    [HttpPost("Create")]
     [Authorize(Roles = "EventCreator")]
     public async Task<ActionResult<EventResponse>> CreateEventAsync(EventRequest newEvent)
     {
