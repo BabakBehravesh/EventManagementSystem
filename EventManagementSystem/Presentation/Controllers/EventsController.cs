@@ -10,7 +10,7 @@ using System.Security.Claims;
 namespace EventManagementSystem.Controllers;
 
 [ApiController]
-[EnableCors(PolicyName = "AllowUIApp")]
+[EnableCors]
 [Route("api/[controller]")]
 public class EventsController : ControllerBase
 {

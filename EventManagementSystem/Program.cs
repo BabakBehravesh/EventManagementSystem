@@ -5,7 +5,6 @@ using EventManagementSystem.Infrastructure.Security;
 using EventManagementSystem.Infrastructure.Storage;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -26,12 +25,12 @@ if (builder.Environment.IsDevelopment())
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()!;
 //    ?? new[] { "http://localhost:4200", "https://localhost:4200" }; // Fallback values
 
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowUIApp",
-        policy =>
+    options.AddDefaultPolicy(builder =>
         {
-            policy.WithOrigins(allowedOrigins)
+            builder.WithOrigins(allowedOrigins)
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
@@ -39,7 +38,7 @@ builder.Services.AddCors(options =>
     );
 });
 
-builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
