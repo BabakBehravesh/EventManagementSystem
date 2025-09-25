@@ -6,7 +6,6 @@ namespace EventManagementSystem.Infrastructure.Storage;
 
 public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
-    // This constructor is ESSENTIAL
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
     {

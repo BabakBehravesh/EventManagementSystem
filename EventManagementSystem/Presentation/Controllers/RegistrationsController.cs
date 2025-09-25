@@ -55,7 +55,7 @@ public class RegistrationsController : ControllerBase
         if (!result.Success) return BadRequest();
 
         var response = new RegistrationResponse(
-            result.Registration.Id,
+            result.Registration!.Id,
             result.Registration.Name,
             result.Registration.PhoneNumber,
             result.Registration.Email,

@@ -28,7 +28,7 @@ public class EventService : IEventService
 
         if (eventEntity == null)
         {
-            throw new Exception($"Event with ID {eventId} was not found.");
+            throw new InvalidOperationException($"Event with ID {eventId} was not found.");
         }
 
         return eventEntity;
@@ -40,7 +40,7 @@ public class EventService : IEventService
 
         if (eventObject == null)
         {
-            throw new KeyNotFoundException($"Event with Id '{eventId}' not found");
+            throw new InvalidOperationException($"Event with Id '{eventId}' not found");
         }
 
         return await _context.Registrations
@@ -63,7 +63,9 @@ public class EventService : IEventService
         }
 
         _context.Events.Add(newEvent);
+
         await _context.SaveChangesAsync();
+
         return newEvent;
     }
 }

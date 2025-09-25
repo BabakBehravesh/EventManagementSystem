@@ -8,4 +8,4 @@ public interface IRegistrationService
     Task<IEnumerable<Registration>> GetRegistrationsForEventAsync(int eventId);
 }
 
-public record RegistrationResult(bool Success, Registration Registration = null, string Message = "");
+public record RegistrationResult(bool Success, Registration? Registration = null, string Message = "");

@@ -10,8 +10,8 @@ public class Event
     public string Location { get; set; } = string.Empty;
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
-
     public required string CreatedBy { get; set; } 
+
     public ApplicationUser? Creator { get; set; } 
     public Collection<Registration> Registrations { get; set; } = [];
 }
