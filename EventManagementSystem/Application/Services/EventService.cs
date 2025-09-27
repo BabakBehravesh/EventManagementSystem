@@ -49,7 +49,7 @@ public class EventService : IEventService
             .ToListAsync();
     }
 
-    public async Task<Event> CreateEventAsync(Event newEvent)
+    public async Task<Event> CreateEventAsync(Event newEvent, string createdBy)
     {
         var existingEvent = await _context.Events
             .FirstOrDefaultAsync(e =>
@@ -61,6 +61,8 @@ public class EventService : IEventService
         {
             throw new Exception($"An event with the same name, time, and location already exists.");
         }
+
+        newEvent.CreatedBy = createdBy;
 
         _context.Events.Add(newEvent);
 

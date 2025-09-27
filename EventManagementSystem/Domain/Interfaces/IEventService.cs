@@ -8,7 +8,7 @@ public interface IEventService
 
     Task<Event> GetEventByIdAsync(int id);
 
-    Task<Event> CreateEventAsync(Event newEvent);
+    Task<Event> CreateEventAsync(Event newEvent, string createdBy);
 
     Task<IEnumerable<Registration>> GetEventParticipantsAsync(int eventId); 
 }

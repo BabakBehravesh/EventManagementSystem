@@ -1,3 +1,4 @@
+using EventManagementSystem.Application.Profiles;
 using EventManagementSystem.Application.Services;
 using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Domain.Models;
@@ -108,6 +109,8 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+
+builder.Services.AddAutoMapper(typeof(EventMappingProfile));
 
 var app = builder.Build();
 

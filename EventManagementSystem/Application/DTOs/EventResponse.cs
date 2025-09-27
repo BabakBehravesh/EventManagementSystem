@@ -1,3 +1,8 @@
 ﻿namespace EventManagementSystem.Application.DTOs;
-public record EventResponse(int id, string name, string description, string location,
-                            DateTime startTime, DateTime endTime);
+public record EventResponse(
+    int Id, 
+    string Name, 
+    string Description, 
+    string Location,
+    DateTime StartTime, 
+    DateTime EndTime);

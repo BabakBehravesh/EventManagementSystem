@@ -1,5 +1,5 @@
-﻿using EventManagementSystem.Application.DTOs;
-using EventManagementSystem.Application.Types;
+﻿using AutoMapper;
+using EventManagementSystem.Application.DTOs;
 using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -15,10 +15,12 @@ namespace EventManagementSystem.Controllers;
 public class EventsController : ControllerBase
 {
     private readonly IEventService _eventService;
+    private readonly IMapper _mapper;
 
-    public EventsController(IEventService eventService)
+    public EventsController(IEventService eventService, IMapper mapper)
     {
         _eventService = eventService;
+        _mapper = mapper;
     }
 
     [HttpGet]
@@ -31,18 +33,12 @@ public class EventsController : ControllerBase
         }
 
         var events = await _eventService.GetAllEventsAsync();
-        var result = events.Select(e => new EventResponse(
-            e.Id,
-            e.Name,
-            e.Description,
-            e.Location,
-            e.StartTime,
-            e.EndTime));
+        var result = _mapper.Map<IEnumerable<EventResponse>>(events);
 
-         return Ok(result);
+        return Ok(result);
     }
 
-    [HttpGet("{eventId}")]
+    [HttpGet("{eventId:int}", Name = "GetEventById")]
     [Authorize]
     public async Task<ActionResult<EventResponse>> GetEventByIdAsync(int eventId)
     {
@@ -51,19 +47,11 @@ public class EventsController : ControllerBase
         if (eventObject == null)
             return NotFound();
 
-        var eventResponse = new EventResponse
-        (
-            eventObject.Id,
-            eventObject.Name,
-            eventObject.Description,
-            eventObject.Location,
-            eventObject.StartTime,
-            eventObject.EndTime
-        );
+        var eventResponse = _mapper.Map<EventResponse>(eventObject);
         return Ok(eventResponse);
     }
 
-    [HttpPost("Create")]
+    [HttpPost]
     [Authorize(Roles = "EventCreator")]
     public async Task<ActionResult<EventResponse>> CreateEventAsync(EventRequest newEvent)
     {
@@ -81,28 +69,16 @@ public class EventsController : ControllerBase
 
         try
         {
-            var eventEntity = new Event
-            {
-                Name = newEvent.Name,
-                Description = newEvent.Description,
-                Location = newEvent.Location,
-                StartTime = newEvent.StartTime,
-                EndTime = newEvent.EndTime,
-                CreatedBy = userId 
-            };
+            var eventEntity = _mapper.Map<Event>(newEvent);
 
-            var createdEvent = await _eventService.CreateEventAsync(eventEntity);
+            var createdEvent = await _eventService.CreateEventAsync(eventEntity, userId!);
 
-            var eventResponse = new EventResponse(
-                createdEvent.Id,
-                createdEvent.Name,
-                createdEvent.Description,
-                createdEvent.Location,
-                createdEvent.StartTime,
-                createdEvent.EndTime
+            var eventResponse = _mapper.Map<EventResponse>(createdEvent);
+
+            return CreatedAtAction(
+                null,
+                eventResponse
             );
-
-            return Created();
         }
         catch (Exception ex)
         {
