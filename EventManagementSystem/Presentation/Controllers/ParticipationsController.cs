@@ -1,4 +1,5 @@
-﻿using EventManagementSystem.Application.DTOs;
+﻿using AutoMapper;
+using EventManagementSystem.Application.DTOs;
 using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -11,25 +12,21 @@ namespace EventManagementSystem.Presentation.Controllers;
 public class ParticipationsController : ControllerBase
 {
     private readonly IParticipationService _registrationService;
+    private readonly IMapper _mapper;
 
-    public ParticipationsController(IParticipationService registrationService)
+    public ParticipationsController(IParticipationService registrationService, IMapper mapper)
     {
         _registrationService = registrationService;
+        _mapper = mapper;
     }
 
     [HttpGet]
     [Authorize(Roles = "EventCreator")] 
     public async Task<ActionResult<IEnumerable<ParticipationResponse>>> GetParticipantsInEvent(int eventId)
     {
-        var registrations = await _registrationService.GetParticipantsInEventAsync(eventId);
-        var result = registrations.Select(r => 
-                new ParticipationResponse(
-                    r.Id,
-                    r.Name,
-                    r.PhoneNumber,
-                    r.Email,
-                    r.EventId,
-                    EventName: r.Event!.Name));
+        var participants = await _registrationService.GetParticipantsInEventAsync(eventId);
+
+        var result =_mapper.Map<IEnumerable<ParticipationResponse>>(participants);
 
         return Ok(result);
     }
@@ -43,26 +40,15 @@ public class ParticipationsController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var registrationEntity = new Participation
-        {
-            Name = request.Name,
-            PhoneNumber = request.PhoneNumber ?? string.Empty, 
-            Email = request.Email
-        };
+        var registrationEntity = _mapper.Map<Participation>(request);
 
-        var result = await _registrationService.ParticipateInEventAsync(eventId, registrationEntity);
+        var participationResult = await _registrationService.ParticipateInEventAsync(eventId, registrationEntity);
 
-        if (!result.Success) return BadRequest();
+        if (!participationResult.Success) return BadRequest();
 
-        var response = new ParticipationResponse(
-            result.Participation!.Id,
-            result.Participation.Name,
-            result.Participation.PhoneNumber,
-            result.Participation.Email,
-            result.Participation.EventId,
-            result.Participation.Event?.Name! 
-        );
 
-        return Ok(response);
+        var result = _mapper.Map<ParticipationResponse>(participationResult.Participation);
+
+        return Ok(result);
     }
 }

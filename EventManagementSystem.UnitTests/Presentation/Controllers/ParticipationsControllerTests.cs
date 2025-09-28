@@ -1,4 +1,5 @@
-﻿using EventManagementSystem.Application.DTOs;
+﻿using AutoMapper;
+using EventManagementSystem.Application.DTOs;
 using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Domain.Models;
 using FluentAssertions;
@@ -12,6 +13,7 @@ namespace EventManagementSystem.Presentation.Controllers.UnitTests;
 public class ParticipationsControllerTests
 {
     private readonly Mock<IParticipationService> _mockRegistrationService;
+    private readonly IMapper mapper;
     private readonly ParticipationsController _controller;
     private readonly Mock<ILogger<ParticipationsController>> _mockLogger;
 
@@ -19,7 +21,7 @@ public class ParticipationsControllerTests
     {
         _mockRegistrationService = new Mock<IParticipationService>();
         _mockLogger = new Mock<ILogger<ParticipationsController>>();
-        _controller = new ParticipationsController(_mockRegistrationService.Object);
+        _controller = new ParticipationsController(_mockRegistrationService.Object, mapper);
     }
 
     [Fact]
@@ -268,10 +270,8 @@ public class ParticipationsControllerTests
         var response = okResult?.Value as ParticipationResponse;
 
         response.Should().NotBeNull();
-        response.PhoneNumber.Should().Be("");
-    }
-
-   
+        response?.PhoneNumber.Should().Be("");
+    }   
 
     [Fact]
     public async Task Participate_ServiceThrowsException_ThrowsException()
