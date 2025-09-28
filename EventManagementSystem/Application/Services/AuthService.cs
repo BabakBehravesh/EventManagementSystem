@@ -1,4 +1,4 @@
-﻿using EventManagementSystem.Application.DTOs;
+﻿using EventManagementSystem.Application.DTOs.Auth;
 using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Domain.Models;
 using Microsoft.AspNetCore.Identity;

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EventManagementSystem.Application.DTOs;
+namespace EventManagementSystem.Application.DTOs.Auth;
 
 public class LoginRequest
 {

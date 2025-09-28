@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace EventManagementSystem.Application.DTOs;
+namespace EventManagementSystem.Application.DTOs.Auth;
 
 public record AuthResult(
     bool Success,

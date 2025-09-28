@@ -1,4 +1,4 @@
-﻿using EventManagementSystem.Application.DTOs;
+﻿using EventManagementSystem.Application.DTOs.Auth;
 
 namespace EventManagementSystem.Domain.Interfaces
 {

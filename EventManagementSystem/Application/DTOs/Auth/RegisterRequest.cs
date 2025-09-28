@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace EventManagementSystem.Application.DTOs;
+namespace EventManagementSystem.Application.DTOs.Auth;
 
 public record RegisterRequest
 {
