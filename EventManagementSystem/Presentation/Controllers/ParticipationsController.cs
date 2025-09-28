@@ -8,22 +8,22 @@ namespace EventManagementSystem.Presentation.Controllers;
 
 [ApiController]
 [Route("api/events/{eventId:int}/[controller]")] 
-public class RegistrationsController : ControllerBase
+public class ParticipationsController : ControllerBase
 {
-    private readonly IRegistrationService _registrationService;
+    private readonly IParticipationService _registrationService;
 
-    public RegistrationsController(IRegistrationService registrationService)
+    public ParticipationsController(IParticipationService registrationService)
     {
         _registrationService = registrationService;
     }
 
     [HttpGet]
     [Authorize(Roles = "EventCreator")] 
-    public async Task<ActionResult<IEnumerable<RegistrationResponse>>> GetRegistrationsForEvent(int eventId)
+    public async Task<ActionResult<IEnumerable<ParticipationResponse>>> GetParticipantsInEvent(int eventId)
     {
-        var registrations = await _registrationService.GetRegistrationsForEventAsync(eventId);
+        var registrations = await _registrationService.GetParticipantsInEventAsync(eventId);
         var result = registrations.Select(r => 
-                new RegistrationResponse(
+                new ParticipationResponse(
                     r.Id,
                     r.Name,
                     r.PhoneNumber,
@@ -36,31 +36,31 @@ public class RegistrationsController : ControllerBase
 
     [HttpPost]
     [Authorize(Roles = "EventParticipant")]
-    public async Task<ActionResult<RegistrationResponse>> Register(int eventId, [FromBody] RegistrationRequest request)
+    public async Task<ActionResult<ParticipationResponse>> Participate(int eventId, [FromBody] ParticipationRequest request)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        var registrationEntity = new Registration
+        var registrationEntity = new Participation
         {
             Name = request.Name,
             PhoneNumber = request.PhoneNumber ?? string.Empty, 
             Email = request.Email
         };
 
-        var result = await _registrationService.RegisterForEventAsync(eventId, registrationEntity);
+        var result = await _registrationService.ParticipateInEventAsync(eventId, registrationEntity);
 
         if (!result.Success) return BadRequest();
 
-        var response = new RegistrationResponse(
-            result.Registration!.Id,
-            result.Registration.Name,
-            result.Registration.PhoneNumber,
-            result.Registration.Email,
-            result.Registration.EventId,
-            result.Registration.Event?.Name! 
+        var response = new ParticipationResponse(
+            result.Participation!.Id,
+            result.Participation.Name,
+            result.Participation.PhoneNumber,
+            result.Participation.Email,
+            result.Participation.EventId,
+            result.Participation.Event?.Name! 
         );
 
         return Ok(response);

@@ -13,5 +13,5 @@ public class Event
     public required string CreatedBy { get; set; } 
 
     public ApplicationUser? Creator { get; set; } 
-    public Collection<Registration> Registrations { get; set; } = [];
+    public Collection<Participation> Registrations { get; set; } = [];
 }

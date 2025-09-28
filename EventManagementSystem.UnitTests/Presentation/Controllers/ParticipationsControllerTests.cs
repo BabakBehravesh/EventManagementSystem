@@ -9,27 +9,27 @@ using Xunit;
 
 namespace EventManagementSystem.Presentation.Controllers.UnitTests;
 
-public class RegistrationsControllerTests
+public class ParticipationsControllerTests
 {
-    private readonly Mock<IRegistrationService> _mockRegistrationService;
-    private readonly RegistrationsController _controller;
-    private readonly Mock<ILogger<RegistrationsController>> _mockLogger;
+    private readonly Mock<IParticipationService> _mockRegistrationService;
+    private readonly ParticipationsController _controller;
+    private readonly Mock<ILogger<ParticipationsController>> _mockLogger;
 
-    public RegistrationsControllerTests()
+    public ParticipationsControllerTests()
     {
-        _mockRegistrationService = new Mock<IRegistrationService>();
-        _mockLogger = new Mock<ILogger<RegistrationsController>>();
-        _controller = new RegistrationsController(_mockRegistrationService.Object);
+        _mockRegistrationService = new Mock<IParticipationService>();
+        _mockLogger = new Mock<ILogger<ParticipationsController>>();
+        _controller = new ParticipationsController(_mockRegistrationService.Object);
     }
 
     [Fact]
-    public async Task GetRegistrationsForEvent_ValidEventId_ReturnsRegistrations()
+    public async Task GetParticipantsInEvent_ValidEventId_ReturnsRegistrations()
     {
         // Arrange
         var eventId = 1;
-        var registrations = new List<Registration>
+        var registrations = new List<Participation>
         {
-            new Registration
+            new Participation
             {
                 Id = 1,
                 Name = "John Doe",
@@ -38,7 +38,7 @@ public class RegistrationsControllerTests
                 EventId = eventId,
                 Event = new Event { Id = eventId, Name = "Test Event", CreatedBy = "Bob@gmail.com" }
             },
-            new Registration
+            new Participation
             {
                 Id = 2,
                 Name = "Jane Smith",
@@ -50,75 +50,75 @@ public class RegistrationsControllerTests
         };
 
         _mockRegistrationService
-            .Setup(service => service.GetRegistrationsForEventAsync(eventId))
+            .Setup(service => service.GetParticipantsInEventAsync(eventId))
             .ReturnsAsync(registrations);
 
         // Act
-        var result = await _controller.GetRegistrationsForEvent(eventId);
+        var result = await _controller.GetParticipantsInEvent(eventId);
 
         // Assert
         result.Result.Should().BeOfType<OkObjectResult>();
         var okResult = result.Result as OkObjectResult;
-        var response = okResult?.Value as IEnumerable<RegistrationResponse>;
+        var response = okResult?.Value as IEnumerable<ParticipationResponse>;
 
         response.Should().HaveCount(2);
         response.Should().Contain(r => r.Name == "John Doe");
         response.Should().Contain(r => r.Name == "Jane Smith");
 
-        _mockRegistrationService.Verify(service => service.GetRegistrationsForEventAsync(eventId), Times.Once);
+        _mockRegistrationService.Verify(service => service.GetParticipantsInEventAsync(eventId), Times.Once);
     }
 
     [Fact]
-    public async Task GetRegistrationsForEvent_NoRegistrations_ReturnsEmptyList()
+    public async Task GetParticipantsInEvent_NoParticipants_ReturnsEmptyList()
     {
         // Arrange
         var eventId = 1;
-        var emptyRegistrations = new List<Registration>();
+        var emptyRegistrations = new List<Participation>();
 
         _mockRegistrationService
-            .Setup(service => service.GetRegistrationsForEventAsync(eventId))
+            .Setup(service => service.GetParticipantsInEventAsync(eventId))
             .ReturnsAsync(emptyRegistrations);
 
         // Act
-        var result = await _controller.GetRegistrationsForEvent(eventId);
+        var result = await _controller.GetParticipantsInEvent(eventId);
 
         // Assert
         result.Result.Should().BeOfType<OkObjectResult>();
         var okResult = result.Result as OkObjectResult;
-        var response = okResult?.Value as IEnumerable<RegistrationResponse>;
+        var response = okResult?.Value as IEnumerable<ParticipationResponse>;
 
         response.Should().BeEmpty();
-        _mockRegistrationService.Verify(service => service.GetRegistrationsForEventAsync(eventId), Times.Once);
+        _mockRegistrationService.Verify(service => service.GetParticipantsInEventAsync(eventId), Times.Once);
     }
 
     [Fact]
-    public async Task GetRegistrationsForEvent_ServiceThrowsException_ThrowsException()
+    public async Task GetParticipantsForEvent_ServiceThrowsException_ThrowsException()
     {
         // Arrange
         var eventId = 1;
 
         _mockRegistrationService
-            .Setup(service => service.GetRegistrationsForEventAsync(eventId))
+            .Setup(service => service.GetParticipantsInEventAsync(eventId))
             .ThrowsAsync(new Exception("Database error"));
 
         // Act & Assert
-        await Assert.ThrowsAsync<Exception>(() => _controller.GetRegistrationsForEvent(eventId));
-        _mockRegistrationService.Verify(service => service.GetRegistrationsForEventAsync(eventId), Times.Once);
+        await Assert.ThrowsAsync<Exception>(() => _controller.GetParticipantsInEvent(eventId));
+        _mockRegistrationService.Verify(service => service.GetParticipantsInEventAsync(eventId), Times.Once);
     }
 
     [Fact]
-    public async Task Register_ValidRequest_ReturnsRegistrationResponse()
+    public async Task Participate_ValidRequest_ReturnsParticipationResponse()
     {
         // Arrange
         var eventId = 1;
-        var request = new RegistrationRequest
+        var request = new ParticipationRequest
         (
             Name: "John Doe",
             Email: "john@example.com",
             PhoneNumber: "123-456-7890"
         );
 
-        var registrationEntity = new Registration
+        var registrationEntity = new Participation
         {
             Id = 1,
             Name = request.Name,
@@ -130,29 +130,29 @@ public class RegistrationsControllerTests
         var eventEntity = new Event { Id = eventId, Name = "Test Event", CreatedBy = "Bob@gmail.com" };
         registrationEntity.Event = eventEntity;
 
-        var registrationResult = new RegistrationResult
+        var registrationResult = new ParticipationResult
         (
             Success: true,
-            Registration: registrationEntity, 
-            Message: "Registration successful"
+            Participation: registrationEntity, 
+            Message: "Participation successful"
         );
 
         _mockRegistrationService
-            .Setup(service => service.RegisterForEventAsync(
+            .Setup(service => service.ParticipateInEventAsync(
                 eventId,
-                It.Is<Registration>(r =>
+                It.Is<Participation>(r =>
                     r.Name == request.Name &&
                     r.Email == request.Email &&
                     r.PhoneNumber == request.PhoneNumber)))
             .ReturnsAsync(registrationResult);
 
         // Act
-        var result = await _controller.Register(eventId, request);
+        var result = await _controller.Participate(eventId, request);
 
         // Assert
         result.Result.Should().BeOfType<OkObjectResult>();
         var okResult = result.Result as OkObjectResult;
-        var response = okResult?.Value as RegistrationResponse;
+        var response = okResult?.Value as ParticipationResponse;
 
         response.Should().NotBeNull();
         response.Id.Should().Be(1);
@@ -162,9 +162,9 @@ public class RegistrationsControllerTests
         response.EventId.Should().Be(eventId);
         response.EventName.Should().Be("Test Event");
 
-        _mockRegistrationService.Verify(service => service.RegisterForEventAsync(
+        _mockRegistrationService.Verify(service => service.ParticipateInEventAsync(
             eventId,
-            It.Is<Registration>(r =>
+            It.Is<Participation>(r =>
                 r.Name == request.Name &&
                 r.Email == request.Email &&
                 r.PhoneNumber == request.PhoneNumber)),
@@ -172,18 +172,18 @@ public class RegistrationsControllerTests
     }
 
     [Fact]
-    public async Task Register_NullPhoneNumber_HandlesNullCorrectly()
+    public async Task Participate_NullPhoneNumber_HandlesNullCorrectly()
     {
         // Arrange
         var eventId = 1;
-        var request = new RegistrationRequest
+        var request = new ParticipationRequest
         (
             Name: "John Doe",
             Email: "john@example.com",
             PhoneNumber: null
         );
 
-        var registrationEntity = new Registration
+        var registrationEntity = new Participation
         {
             Id = 1,
             Name = request.Name,
@@ -193,47 +193,47 @@ public class RegistrationsControllerTests
             Event = new Event { Id = eventId, Name = "Test Event", CreatedBy = "Bob@gmail.com" }
         };
 
-        var registrationResult = new RegistrationResult
+        var registrationResult = new ParticipationResult
         (
             Success: true,
-            Registration: registrationEntity, 
-            Message: "Registration successful"
+            Participation: registrationEntity, 
+            Message: "Participation successful"
         );
 
         _mockRegistrationService
-            .Setup(service => service.RegisterForEventAsync(
+            .Setup(service => service.ParticipateInEventAsync(
                 eventId,
-                It.Is<Registration>(r =>
+                It.Is<Participation>(r =>
                     r.Name == request.Name &&
                     r.Email == request.Email &&
                     r.PhoneNumber == string.Empty))) 
             .ReturnsAsync(registrationResult);
 
         // Act
-        var result = await _controller.Register(eventId, request);
+        var result = await _controller.Participate(eventId, request);
 
         // Assert
         result.Result.Should().BeOfType<OkObjectResult>();
         var okResult = result.Result as OkObjectResult;
-        var response = okResult?.Value as RegistrationResponse;
+        var response = okResult?.Value as ParticipationResponse;
 
         response.Should().NotBeNull();
         response.PhoneNumber.Should().Be(string.Empty);
     }
 
     [Fact]
-    public async Task Register_EmptyPhoneNumber_HandlesEmptyString()
+    public async Task Participate_EmptyPhoneNumber_HandlesEmptyString()
     {
         // Arrange
         var eventId = 1;
-        var request = new RegistrationRequest
+        var request = new ParticipationRequest
         (
             Name: "John Doe",
             Email: "john@example.com",
             PhoneNumber: ""
         );
 
-        var registrationEntity = new Registration
+        var registrationEntity = new Participation
         {
             Id = 1,
             Name = request.Name,
@@ -243,29 +243,29 @@ public class RegistrationsControllerTests
             Event = new Event { Id = eventId, Name = "Test Event", CreatedBy = "Bob@gmail.com" }
         };
 
-        var registrationResult = new RegistrationResult
+        var registrationResult = new ParticipationResult
                 (
                     Success: true,
-                    Registration: registrationEntity,
-                    Message: "Registration successful"
+                    Participation: registrationEntity,
+                    Message: "Participation successful"
                 );
 
         _mockRegistrationService
-            .Setup(service => service.RegisterForEventAsync(
+            .Setup(service => service.ParticipateInEventAsync(
                 eventId,
-                It.Is<Registration>(r =>
+                It.Is<Participation>(r =>
                     r.Name == request.Name &&
                     r.Email == request.Email &&
                     r.PhoneNumber == "")))
             .ReturnsAsync(registrationResult);
 
         // Act
-        var result = await _controller.Register(eventId, request);
+        var result = await _controller.Participate(eventId, request);
 
         // Assert
         result.Result.Should().BeOfType<OkObjectResult>();
         var okResult = result.Result as OkObjectResult;
-        var response = okResult?.Value as RegistrationResponse;
+        var response = okResult?.Value as ParticipationResponse;
 
         response.Should().NotBeNull();
         response.PhoneNumber.Should().Be("");
@@ -274,11 +274,11 @@ public class RegistrationsControllerTests
    
 
     [Fact]
-    public async Task Register_ServiceThrowsException_ThrowsException()
+    public async Task Participate_ServiceThrowsException_ThrowsException()
     {
         // Arrange
         var eventId = 1;
-        var request = new RegistrationRequest
+        var request = new ParticipationRequest
         (
             Name: "John Doe",
             PhoneNumber: "123-456-7890",
@@ -286,12 +286,12 @@ public class RegistrationsControllerTests
         );
 
         _mockRegistrationService
-            .Setup(service => service.RegisterForEventAsync(eventId, It.IsAny<Registration>()))
-            .ThrowsAsync(new Exception("Registration failed"));
+            .Setup(service => service.ParticipateInEventAsync(eventId, It.IsAny<Participation>()))
+            .ThrowsAsync(new Exception("Participation failed"));
 
         // Act & Assert
-        await Assert.ThrowsAsync<Exception>(() => _controller.Register(eventId, request));
-        _mockRegistrationService.Verify(service => service.RegisterForEventAsync(
-            eventId, It.IsAny<Registration>()), Times.Once);
+        await Assert.ThrowsAsync<Exception>(() => _controller.Participate(eventId, request));
+        _mockRegistrationService.Verify(service => service.ParticipateInEventAsync(
+            eventId, It.IsAny<Participation>()), Times.Once);
     }
 }

@@ -43,7 +43,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEventService, EventService>();
-builder.Services.AddScoped<IRegistrationService, RegistrationService>();
+builder.Services.AddScoped<IParticipationService, ParticipationService>();
 builder.Services.AddScoped<DbInitializer>();
 
 builder.Services.AddControllers();

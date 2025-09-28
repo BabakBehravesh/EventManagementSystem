@@ -8,7 +8,7 @@
     using Microsoft.EntityFrameworkCore;
     using Xunit;
 
-    public class RegistrationServiceTests
+    public class ParticipationServiceTests
     {
         private ApplicationDbContext GetInMemoryDbContext(string dbName)
         {
@@ -20,16 +20,16 @@
         }
 
         [Fact]
-        public async Task RegisterForEventAsync_EventDoesNotExist_ReturnsFailure()
+        public async Task ParticipateInEventAsync_EventDoesNotExist_ReturnsFailure()
         {
             // Arrange
-            using var context = GetInMemoryDbContext(nameof(RegisterForEventAsync_EventDoesNotExist_ReturnsFailure));
-            var service = new RegistrationService(context);
+            using var context = GetInMemoryDbContext(nameof(ParticipateInEventAsync_EventDoesNotExist_ReturnsFailure));
+            var service = new ParticipationService(context);
 
-            var registration = new Registration { Email = "test@example.com", Name = "Test User" };
+            var registration = new Participation { Email = "test@example.com", Name = "Test User" };
 
             // Act
-            var result = await service.RegisterForEventAsync(1, registration);
+            var result = await service.ParticipateInEventAsync(1, registration);
 
             // Assert
             Assert.False(result.Success);
@@ -37,20 +37,20 @@
         }
 
         [Fact]
-        public async Task RegisterForEventAsync_AlreadyRegistered_ReturnsFailure()
+        public async Task ParticipateInEventAsync_AlreadyRegistered_ReturnsFailure()
         {
             // Arrange
-            using var context = GetInMemoryDbContext(nameof(RegisterForEventAsync_AlreadyRegistered_ReturnsFailure));
+            using var context = GetInMemoryDbContext(nameof(ParticipateInEventAsync_AlreadyRegistered_ReturnsFailure));
 
             context.Events.Add(new Event { Id = 1, Name = "Test Event", CreatedBy = "1" });
-            context.Registrations.Add(new Registration { EventId = 1, Email = "test@example.com", Name = "Existing User" });
+            context.Registrations.Add(new Participation { EventId = 1, Email = "test@example.com", Name = "Existing User" });
             await context.SaveChangesAsync();
 
-            var service = new RegistrationService(context);
-            var registration = new Registration { Email = "test@example.com", Name = "New User" };
+            var service = new ParticipationService(context);
+            var registration = new Participation { Email = "test@example.com", Name = "New User" };
 
             // Act
-            var result = await service.RegisterForEventAsync(1, registration);
+            var result = await service.ParticipateInEventAsync(1, registration);
 
             // Assert
             Assert.False(result.Success);
@@ -58,50 +58,50 @@
         }
 
         [Fact]
-        public async Task RegisterForEventAsync_NewRegistration_Success()
+        public async Task ParticipateInEventAsync_NewRegistration_Success()
         {
             // Arrange
-            using var context = GetInMemoryDbContext(nameof(RegisterForEventAsync_NewRegistration_Success));
+            using var context = GetInMemoryDbContext(nameof(ParticipateInEventAsync_NewRegistration_Success));
 
             var ev = new Event { Id = 1, Name = "Test Event", CreatedBy = "1" };
             context.Events.Add(ev);
             await context.SaveChangesAsync();
 
-            var service = new RegistrationService(context);
-            var registration = new Registration { Email = "test@example.com", Name = "New User" };
+            var service = new ParticipationService(context);
+            var registration = new Participation { Email = "test@example.com", Name = "New User" };
 
             // Act
-            var result = await service.RegisterForEventAsync(1, registration);
+            var result = await service.ParticipateInEventAsync(1, registration);
 
             // Assert
             Assert.True(result.Success);
             Assert.Equal("Registered successfully!", result.Message);
-            Assert.NotNull(result.Registration);
+            Assert.NotNull(result.Participation);
             Assert.Equal(1, context.Registrations.Count());
         }
 
         [Fact]
-        public async Task GetRegistrationsForEventAsync_ReturnsCorrectRegistrations()
+        public async Task GetParticipantsInEventAsync_ReturnsCorrectRegistrations()
         {
             // Arrange
-            using var context = GetInMemoryDbContext(nameof(GetRegistrationsForEventAsync_ReturnsCorrectRegistrations));
+            using var context = GetInMemoryDbContext(nameof(GetParticipantsInEventAsync_ReturnsCorrectRegistrations));
 
             var ev1 = new Event { Id = 1, Name = "Event 1", CreatedBy = "1" };
             var ev2 = new Event { Id = 2, Name = "Event 2", CreatedBy = "1" };
             context.Events.AddRange(ev1, ev2);
 
             context.Registrations.AddRange(
-                new Registration { EventId = 1, Email = "a@test.com", Name = "User A" },
-                new Registration { EventId = 1, Email = "b@test.com", Name = "User B" },
-                new Registration { EventId = 2, Email = "c@test.com", Name = "User C" }
+                new Participation { EventId = 1, Email = "a@test.com", Name = "User A" },
+                new Participation { EventId = 1, Email = "b@test.com", Name = "User B" },
+                new Participation { EventId = 2, Email = "c@test.com", Name = "User C" }
             );
 
             await context.SaveChangesAsync();
 
-            var service = new RegistrationService(context);
+            var service = new ParticipationService(context);
 
             // Act
-            var result = await service.GetRegistrationsForEventAsync(1);
+            var result = await service.GetParticipantsInEventAsync(1);
 
             // Assert
             Assert.Equal(2, result.Count());

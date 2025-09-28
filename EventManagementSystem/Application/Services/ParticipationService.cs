@@ -5,32 +5,32 @@ using EventManagementSystem.Domain.Models;
 using EventManagementSystem.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
 
-public class RegistrationService : IRegistrationService
+public class ParticipationService : IParticipationService
 {
     private readonly ApplicationDbContext _context;
 
-    public RegistrationService(ApplicationDbContext context)
+    public ParticipationService(ApplicationDbContext context)
     {
         _context = context;
     }
 
-    public async Task<RegistrationResult> RegisterForEventAsync(int eventId, Registration registration)
+    public async Task<ParticipationResult> ParticipateInEventAsync(int eventId, Participation registration)
     {
         var eventEntity = await _context.Events.FindAsync(eventId);
         if (eventEntity == null)
-            return new RegistrationResult(false, Message: "Event not found.");
+            return new ParticipationResult(false, Message: "Event not found.");
 
         var alreadyRegistered = await _context.Registrations.AnyAsync(r => r.EventId == eventId && r.Email == registration.Email.ToLower());
         if (alreadyRegistered)
-            return new RegistrationResult(false, Message: "You have been already refistered to this event.");
+            return new ParticipationResult(false, Message: "You have been already refistered to this event.");
 
         registration.EventId = eventId; 
         _context.Registrations.Add(registration);
         await _context.SaveChangesAsync();
-        return new RegistrationResult(true, registration, "Registered successfully!");
+        return new ParticipationResult(true, registration, "Registered successfully!");
     }
 
-    public async Task<IEnumerable<Registration>> GetRegistrationsForEventAsync(int eventId)
+    public async Task<IEnumerable<Participation>> GetParticipantsInEventAsync(int eventId)
     {
         return await _context.Registrations
             .Include(r => r.Event)

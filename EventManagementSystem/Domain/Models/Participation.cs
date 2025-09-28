@@ -1,6 +1,6 @@
 ﻿namespace EventManagementSystem.Domain.Models
 {
-    public class Registration
+    public class Participation
     {
         public int Id { get; set; }
         public int EventId { get; set; }

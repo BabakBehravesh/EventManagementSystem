@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 namespace EventManagementSystem.Application.DTOs;
-public record RegistrationRequest
+public record ParticipationRequest
 (
     [Required] 
     string Name,

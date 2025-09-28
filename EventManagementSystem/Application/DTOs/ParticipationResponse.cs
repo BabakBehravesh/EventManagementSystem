@@ -1,6 +1,6 @@
 ﻿namespace EventManagementSystem.Application.DTOs;
 
-public record RegistrationResponse(
+public record ParticipationResponse(
     int Id,
     string Name,
     string? PhoneNumber,

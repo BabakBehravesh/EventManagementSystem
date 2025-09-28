@@ -34,7 +34,7 @@ public class EventService : IEventService
         return eventEntity;
     }
 
-    public async Task<IEnumerable<Registration>> GetEventParticipantsAsync(int eventId)
+    public async Task<IEnumerable<Participation>> GetEventParticipantsAsync(int eventId)
     {
         var eventObject = await _context.Events.FirstOrDefaultAsync(e => e.Id == eventId);
 
@@ -65,7 +65,6 @@ public class EventService : IEventService
         newEvent.CreatedBy = createdBy;
 
         _context.Events.Add(newEvent);
-
         await _context.SaveChangesAsync();
 
         return newEvent;

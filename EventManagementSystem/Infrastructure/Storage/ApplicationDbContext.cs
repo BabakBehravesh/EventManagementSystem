@@ -12,7 +12,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     }
 
     public DbSet<Event> Events => Set<Event>();
-    public DbSet<Registration> Registrations => Set<Registration>();
+    public DbSet<Participation> Registrations => Set<Participation>();
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -30,13 +30,13 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .IsUnique();
 
 
-        modelBuilder.Entity<Registration>()
+        modelBuilder.Entity<Participation>()
             .HasOne(r => r.Event)
             .WithMany(e => e.Registrations)
             .HasForeignKey(r => r.EventId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        modelBuilder.Entity<Registration>()
+        modelBuilder.Entity<Participation>()
             .HasIndex(r => new { r.EventId, r.Email })
             .IsUnique();
     }
