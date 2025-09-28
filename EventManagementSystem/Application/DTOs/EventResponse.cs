@@ -5,4 +5,5 @@ public record EventResponse(
     string Description, 
     string Location,
     DateTime StartTime, 
-    DateTime EndTime);
+    DateTime EndTime
+);

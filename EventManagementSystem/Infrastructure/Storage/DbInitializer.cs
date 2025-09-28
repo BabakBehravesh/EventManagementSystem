@@ -63,6 +63,8 @@ public class DbInitializer(
         _logger.LogInformation("Creating admin user...");
         ApplicationUser adminUser = new()
         {
+            FirstName = "Admin",
+            LastName = "Admin",
             UserName = adminUserName,
             Email = adminEmail,
             EmailConfirmed = true

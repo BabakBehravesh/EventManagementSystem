@@ -44,6 +44,7 @@ builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<DbInitializer>();
 
 builder.Services.AddControllers();
@@ -58,7 +59,6 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
-var key = Encoding.ASCII.GetBytes(jwtSettings!.Secret);
 
 builder.Services.AddAuthentication(options =>
 {
@@ -72,7 +72,7 @@ builder.Services.AddAuthentication(options =>
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSettings!.Secret)),
         ValidateIssuer = true,
         ValidIssuer = jwtSettings.Issuer,
         ValidateAudience = true,
@@ -81,7 +81,6 @@ builder.Services.AddAuthentication(options =>
         ClockSkew = TimeSpan.Zero
     };
 });
-
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -132,7 +131,6 @@ using (var scope = app.Services.CreateScope())
         logger.LogError(ex, "An error occurred while initializing the database.");
     }
 }
-
 
 if (app.Environment.IsDevelopment())
 {
