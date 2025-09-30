@@ -14,14 +14,17 @@ public class AuthController : ControllerBase
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
+    private readonly IAuthService _authService;
 
     public AuthController(UserManager<ApplicationUser> userManager, 
                             RoleManager<IdentityRole> roleManager, 
-                            IJwtTokenGenerator jwtTokenGenerator)
+                            IJwtTokenGenerator jwtTokenGenerator,
+                            IAuthService authService)
     { 
         _userManager = userManager;
         _roleManager = roleManager;
         _jwtTokenGenerator = jwtTokenGenerator;
+        _authService = authService;
     }
 
     [Authorize(Roles = "EventCreator")]
@@ -32,20 +35,33 @@ public class AuthController : ControllerBase
         {
             return BadRequest(ModelState);
         }
-        var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
-        var result = await _userManager.CreateAsync(user, model.Password);
 
-        if (result.Succeeded)
+        var createdBy = await _userManager.GetUserAsync(User);
+        
+        if (createdBy == null)
         {
-            foreach( var r in model.UserRoles)
-            { 
-                await _userManager.AddToRoleAsync(user, r.ToString());
-            }
-
-            return Ok(new { Message = "User registered successfully!" });
+            return BadRequest();
         }
 
-        return BadRequest(result.Errors);
+        var authResult = await _authService.RegisterAsync(model, createdBy);
+
+        if (authResult.Success)
+        {
+            return Ok(new { Message = authResult.Message });
+        }
+        //var result = await _userManager.CreateAsync(user, model.Password);
+
+        //if (result.Succeeded)
+        //{
+        //    foreach( var r in model.UserRoles)
+        //    { 
+        //        await _userManager.AddToRoleAsync(user, r.ToString());
+        //    }
+
+        //    return Ok(new { Message = "User registered successfully!" });
+        //}
+
+        return BadRequest(authResult);
     }
 
     [AllowAnonymous]

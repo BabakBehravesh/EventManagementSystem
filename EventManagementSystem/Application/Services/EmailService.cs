@@ -77,9 +77,17 @@ public class EmailService : IEmailService
         await SendEmailAsync(message, cancellationToken);
     }
 
-    public Task SendAccountCreatedEmailAsync(string email, string userName, string password, CancellationToken cancellationToken = default)
+    public async Task SendAccountCreatedEmailAsync(string recipientEmail, string recipientName, string temporaryPassword, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var message = new EmailMessageBuilder(_environment)
+            .SetFrom(_configuration["EmailSettings:FromName"], _configuration["EmailSettings:Username"])
+            .AddTo(recipientName, recipientEmail)
+            .SetSubject("Your Account Has Been Created")
+            .AddImageLogo()
+            .SetAccountCreatedTemplate(recipientName, temporaryPassword, _configuration["Frontend:BaseUrl"])
+            .Build();
+
+        await SendEmailAsync(message, cancellationToken);
     }
 
     private async Task SendEmailAsync(MimeMessage message, CancellationToken cancellationToken = default)

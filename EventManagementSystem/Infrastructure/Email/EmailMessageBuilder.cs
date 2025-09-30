@@ -97,6 +97,42 @@ public class EmailMessageBuilder
         return this;
     }
 
+    public EmailMessageBuilder SetAccountCreatedTemplate(string recipientName, string temporaryPassword, string frontendBaseUrl)
+    {
+
+        var htmlBody = $@"<html>
+<body style='font-family: Arial, sans-serif; line-height: 1.6;'>
+    <div style='max-width: 600px; margin: 0 auto; padding: 20px;'>
+        {_imageHtmlCode}
+        <h1 style='color: #3366cc;'>Your Account Has Been Created</h1>
+        <p>Hello {recipientName},</p>
+        <p>An administrator has created an account for you in our system.</p>
+        
+        <div style='background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;'>
+            <p><strong>Temporary Password:</strong> {temporaryPassword}</p>
+        </div>
+        
+        <p>Please login and change your password immediately.</p>
+        
+        <div style='text-align: center; margin: 30px 0;'>
+            <a href='{frontendBaseUrl}/auth/login' 
+               style='background: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px;'>
+               Login to Your Account
+            </a>
+        </div>
+        
+        <div style='background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;'>
+            <p><strong>Security Notice:</strong> For security reasons, please change your password after first login.</p>
+        </div>
+    </div>
+</body>
+</html>";
+
+        _bodyBuilder.HtmlBody = htmlBody;
+        _bodyBuilder.TextBody = StripHtml(htmlBody);
+        return this;
+    }
+
     public EmailMessageBuilder SetPasswordResetTemplate(string recipientName, string resetLink)
     {
         var htmlBody = $@"<html>

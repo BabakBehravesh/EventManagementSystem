@@ -63,9 +63,13 @@ public class DbInitializer(
         _logger.LogInformation("Creating admin user...");
         ApplicationUser adminUser = new()
         {
+            FirstName = "Admin",
+            LastName = "Admin",
             UserName = adminUserName,
             Email = adminEmail,
-            EmailConfirmed = true
+            EmailConfirmed = true,
+            CreatedBy = "system@system.com",
+            CreatedAt = DateTime.UtcNow
         };
 
         var result = await _userManager.CreateAsync(adminUser, adminPassword);
