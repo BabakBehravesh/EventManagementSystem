@@ -106,6 +106,66 @@ public class AuthService : IAuthService
         }
     }
 
+    public async Task<AuthResult> ChangeUserProfileAsync(string userId, UserProfileRequest model)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return AuthResult.FailureResult("User not found.");
+        }
+
+        user.FirstName = model.FirstName;
+        user.LastName = model.LastName;
+
+        var result = await _userManager.UpdateAsync(user);
+        
+        if (result.Succeeded)
+        {
+            return AuthResult.SuccessResult("User profile updated successfully.");
+        }
+
+        return AuthResult.FailureResult("Failed to update user profile.", result.Errors);
+    }
+
+    public async Task<AuthResult> LoadUserProfileAsync(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return AuthResult.FailureResult("User not found.");
+        }
+
+        user.FirstName = user.FirstName;
+        user.LastName = user.LastName;
+
+        UserInfo userInfo = new()
+        {
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email
+        };
+
+        return AuthResult.SuccessResult("User profile updated successfully.","", userInfo);
+    }
+
+    public async Task<AuthResult> DeleteUserAsync(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return AuthResult.FailureResult("User not found.");
+        }
+
+        var result = await _userManager.DeleteAsync(user);
+
+        if (result.Succeeded)
+        { 
+            return AuthResult.SuccessResult($"User {user.Email} deleted successfully.");
+        }
+
+        return AuthResult.FailureResult($"Failed to delete user: {user.Email}", result.Errors);
+    }
+
     public async Task<AuthResult> LoginAsync(LoginRequest request)
     {
         var user = await _userManager.FindByEmailAsync(request.Email);

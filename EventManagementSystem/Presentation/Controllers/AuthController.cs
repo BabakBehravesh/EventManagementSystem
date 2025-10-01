@@ -69,6 +69,66 @@ public class AuthController : ControllerBase
         return result;
     }
 
+
+
+    [Authorize]
+    [HttpGet("load-user-profile")]
+    public async Task<IActionResult> LoadUserProfile()
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        
+        if (userId == null)
+        {
+            return BadRequest("User ID not found.");
+        }
+
+        var result = await _authService.LoadUserProfileAsync(userId);
+
+        if (result.Success)
+        {
+            return Ok(new { Message = result.Message, User = result!.UserInfo  });
+        }
+        return BadRequest(result);
+    }
+
+    [Authorize]
+    [HttpPut("change-user-profile")]
+    public async Task<IActionResult> ChangeUserProfile([FromBody] UserProfileRequest model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var result = await _authService.ChangeUserProfileAsync(userId, model);
+        
+        if (result.Success)
+        {
+            return Ok(new { Message = result.Message });
+        }
+        return BadRequest(result);
+    }
+
+    [Authorize("Admin")]
+    [HttpDelete]
+    public async Task<IActionResult> DeleteUser([FromQuery] string userId)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        var result = await _authService.DeleteUserAsync(userId);
+        if (result.Success)
+        {
+            return Ok(new { Message = result.Message });
+        }
+        return BadRequest(result);
+    }
+
     [AllowAnonymous]
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest model)
@@ -88,6 +148,6 @@ public class AuthController : ControllerBase
         var roles = await _userManager.GetRolesAsync(user);
         var token = _jwtTokenGenerator.GenerateToken(user, roles);
 
-        return Ok(new { Token = token, Message = "Login successful!" });
+        return Ok(new { Token = token, Message = "Login successful!", User = new { FirstName = user.FirstName, LastName = user.LastName, Email = user.Email } });
     }
 }

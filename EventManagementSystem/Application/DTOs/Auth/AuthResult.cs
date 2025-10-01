@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-
-namespace EventManagementSystem.Application.DTOs.Auth;
+﻿namespace EventManagementSystem.Application.DTOs.Auth;
 
 using Microsoft.AspNetCore.Identity;
 public class AuthResult
