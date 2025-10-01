@@ -115,7 +115,7 @@ public class EmailMessageBuilder
         <p>Please login and change your password immediately.</p>
         
         <div style='text-align: center; margin: 30px 0;'>
-            <a href='{frontendBaseUrl}/auth/login' 
+            <a href='{frontendBaseUrl}/login' 
                style='background: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px;'>
                Login to Your Account
             </a>

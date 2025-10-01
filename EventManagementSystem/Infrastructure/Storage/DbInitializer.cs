@@ -75,7 +75,7 @@ public class DbInitializer(
         var result = await _userManager.CreateAsync(adminUser, adminPassword);
         if (result.Succeeded)
         {
-            await _userManager.AddToRoleAsync(adminUser, RoleType.EventCreator.ToString());
+            await _userManager.AddToRoleAsync(adminUser, RoleType.Admin.ToString());
             _logger.LogInformation("Admin user created successfully");
         }
         else

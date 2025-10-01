@@ -27,7 +27,7 @@ public class AuthController : ControllerBase
         _authService = authService;
     }
 
-    [Authorize(Roles = "EventCreator")]
+    [Authorize(Roles = "Admin")]
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest model)
     {
@@ -49,26 +49,37 @@ public class AuthController : ControllerBase
         {
             return Ok(new { Message = authResult.Message });
         }
-        //var result = await _userManager.CreateAsync(user, model.Password);
-
-        //if (result.Succeeded)
-        //{
-        //    foreach( var r in model.UserRoles)
-        //    { 
-        //        await _userManager.AddToRoleAsync(user, r.ToString());
-        //    }
-
-        //    return Ok(new { Message = "User registered successfully!" });
-        //}
 
         return BadRequest(authResult);
+    }
+
+
+    [Authorize]
+    [HttpPost("change-password")]
+    public async Task<ActionResult<AuthResult>> ChangePassword([FromBody] ChangePasswordRequest model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(AuthResult.ValidationFailure(
+                ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage))));
+        }
+
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var result = await _authService.ChangePasswordAsync(userId, model);
+        return result;
     }
 
     [AllowAnonymous]
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest model)
     {
+        if (User.Identity.IsAuthenticated)
+        { 
+            return BadRequest("The user is already authenticated.");
+        }
+        
         var user = await _userManager.FindByEmailAsync(model.Email);
+
         if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
         {
             return Unauthorized(new { Message = "Invalid login attempt." });
