@@ -13,7 +13,7 @@
 
             services.AddCors(options =>
             {
-                options.AddPolicy("AllowUIApp",
+                options.AddDefaultPolicy(
                     policy =>
                     {
                         policy.WithOrigins(allowedOrigins)
