@@ -297,6 +297,8 @@ public class EmailMessageBuilder : IEmailMessageBuilder
     public MimeMessage Build()
     {
         _message.Body = _bodyBuilder.ToMessageBody();
+
+        _imageHtmlCode = string.Empty; // Reset for safty (through transient means new instance each time)
         return _message;
     }
 

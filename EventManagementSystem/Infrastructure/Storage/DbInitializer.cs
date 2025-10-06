@@ -9,7 +9,7 @@ public class DbInitializer(
     UserManager<ApplicationUser> userManager,
     IConfiguration configuration,
     ILogger<DbInitializer> logger
-        )
+    )
 {
     private readonly RoleManager<IdentityRole> _roleManager = roleManager;
     private readonly UserManager<ApplicationUser> _userManager = userManager;
