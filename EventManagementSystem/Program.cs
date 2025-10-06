@@ -2,6 +2,8 @@ using EventManagementSystem.Application.Profiles;
 using EventManagementSystem.Application.Services;
 using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Domain.Models;
+using EventManagementSystem.Infrastructure.Email;
+using EventManagementSystem.Infrastructure.QrCode;
 using EventManagementSystem.Infrastructure.Security;
 using EventManagementSystem.Infrastructure.Storage;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -45,6 +47,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IParticipationService, ParticipationService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IEmailMessageBuilder, EmailMessageBuilder>();
+builder.Services.AddScoped<IQRCodeGeneratorService, QRCodeGeneratorService>();
 builder.Services.AddScoped<DbInitializer>();
 
 builder.Services.AddControllers();

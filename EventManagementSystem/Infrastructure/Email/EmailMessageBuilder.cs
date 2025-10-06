@@ -1,8 +1,11 @@
-﻿using MimeKit;
+﻿using EventManagementSystem.Domain.Interfaces;
+using EventManagementSystem.Infrastructure.QrCode;
+using MimeKit;
+using MimeKit.Utils;
 
 namespace EventManagementSystem.Infrastructure.Email;
 
-public class EmailMessageBuilder
+public class EmailMessageBuilder : IEmailMessageBuilder
 {
     private readonly MimeMessage _message;
     private readonly BodyBuilder _bodyBuilder;
@@ -31,12 +34,6 @@ public class EmailMessageBuilder
     public EmailMessageBuilder AddTo(string name, string email)
     {
         _message.To.Add(new MailboxAddress(name, email));
-        return this;
-    }
-
-    public EmailMessageBuilder AddTo(string email)
-    {
-        _message.To.Add(new MailboxAddress("", email));
         return this;
     }
 
@@ -266,6 +263,34 @@ public class EmailMessageBuilder
     public EmailMessageBuilder AddAttachment(byte[] fileData, string fileName)
     {
         _bodyBuilder.Attachments.Add(fileName, fileData);
+        return this;
+    }
+
+
+    public EmailMessageBuilder AddQRCode(
+    byte[] qrCodeBytes,
+    string? altText = "QR Code",
+    string? sectionTitle = "Your QR Code",
+    string? footerNote = "Scan this QR code for quick access")
+    {
+        if (qrCodeBytes == null || qrCodeBytes.Length == 0)
+            throw new ArgumentException("QR code data cannot be empty.", nameof(qrCodeBytes));
+
+        string contentId = MimeKit.Utils.MimeUtils.GenerateMessageId();
+
+        string qrSection = $@"
+        <div style='text-align:center; margin:30px 0; padding:20px; background:#f9f9f9; border-radius:8px;'>
+            <h3 style='color:#333; margin-bottom:15px;'>{sectionTitle}</h3>
+            <img src='cid:{contentId}' alt='{altText}' 
+                 style='display:block; margin:0 auto; max-width:300px; height:auto;' />
+            <p style='color:#666; font-size:14px; margin-top:15px;'>{footerNote}</p>
+        </div>";
+
+        _bodyBuilder.HtmlBody += qrSection;
+
+        var qrImage = _bodyBuilder.LinkedResources.Add("qr.png", qrCodeBytes, MimeKit.ContentType.Parse("image/png"));
+        qrImage.ContentId = contentId;
+
         return this;
     }
 

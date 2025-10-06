@@ -1,15 +1,9 @@
-﻿using QRCoder;
-using System.Drawing;           
-using System.Drawing.Imaging;   
-using System.IO;               
+﻿using EventManagementSystem.Domain.Interfaces;
+using QRCoder;
 
-public interface IQRCodeGenerator
-{
-    byte[] GenerateQRCode(string data);
-    byte[] GenerateQRCode(string data, int pixelsPerModule, string darkColorHex, string lightColorHex);
-}
+namespace EventManagementSystem.Infrastructure.QrCode;
 
-public class QRCodeGeneratorService : IQRCodeGenerator
+public class QRCodeGeneratorService : IQRCodeGeneratorService
 {
     public byte[] GenerateQRCode(string data)
     {
@@ -29,6 +23,18 @@ public class QRCodeGeneratorService : IQRCodeGenerator
                     darkColorHex,
                     lightColorHex
                     );
+            }
+        }
+    }
+
+    public string GenerateQRCodeAsBase64(string data, int qrCodeSize)
+    {
+        using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
+        {
+            QRCodeData qrCodeData = qrGenerator.CreateQrCode(data, QRCodeGenerator.ECCLevel.Q);
+            using (Base64QRCode qrCode = new Base64QRCode(qrCodeData))
+            {
+                return qrCode.GetGraphic(qrCodeSize); // Returns base64 string
             }
         }
     }

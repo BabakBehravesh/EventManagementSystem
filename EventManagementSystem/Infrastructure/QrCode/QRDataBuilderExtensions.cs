@@ -7,9 +7,9 @@
             return builder.WithCustomField("EMAIL", email);
         }
 
-        public static QRDataBuilder WithName(this QRDataBuilder builder, string name)
+        public static QRDataBuilder WithParticipantName(this QRDataBuilder builder, string name)
         {
-            return builder.WithCustomField("NAME", name);
+            return builder.WithCustomField("PARTICIPANT_NAME", name);
         }
 
         public static QRDataBuilder WithRoles(this QRDataBuilder builder, ICollection<string> roles)

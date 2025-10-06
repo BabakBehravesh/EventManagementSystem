@@ -1,4 +1,6 @@
-﻿namespace EventManagementSystem.Domain.Interfaces;
+﻿using EventManagementSystem.Infrastructure.QrCode;
+
+namespace EventManagementSystem.Domain.Interfaces;
 
 public interface IEmailService
 {
@@ -7,6 +9,17 @@ public interface IEmailService
     Task SendPasswordResetEmailAsync(string recipientEmail, string recipientName, string resetLink, CancellationToken cancellationToken = default);
     
     Task SendCustomEmailAsync(string recipientEmail, string recipientName, string subject, string htmlContent, string attachmentPath = null, 
+        CancellationToken cancellationToken = default);
+
+    Task SendCustomEmailAsync(
+        string recipientEmail,
+        string recipientName,
+        string subject,
+        string htmlContent,
+        QRDataBuilder qrDataBuilder,
+        string qrCodeAltText = "QR Code",
+        int qrCodeSize = 20,
+        string attachmentPath = null,
         CancellationToken cancellationToken = default);
 
     Task SendPasswordChangeConfirmationEmailAsync(string recipientEmail, string recipientName, CancellationToken cancellationToken = default);

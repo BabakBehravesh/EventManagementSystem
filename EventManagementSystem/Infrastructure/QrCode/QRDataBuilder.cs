@@ -41,13 +41,13 @@ namespace EventManagementSystem.Infrastructure.QrCode
             return this;
         }
 
-        public QRDataBuilder AsJsonFormat(string format)
+        public QRDataBuilder AsJsonFormat()
         {
             _format = "JSON";
             return this;
         }
 
-        public QRDataBuilder AsKeyValueFormat(string format)
+        public QRDataBuilder AsKeyValueFormat()
         {
             _format = "KEYVALUE";
             return this;

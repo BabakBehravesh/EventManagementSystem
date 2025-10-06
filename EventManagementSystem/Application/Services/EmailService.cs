@@ -1,8 +1,10 @@
 ﻿using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Infrastructure.Email;
+using EventManagementSystem.Infrastructure.QrCode;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
+using QRCoder;
 
 namespace EventManagementSystem.Application.Services;
 
@@ -10,13 +12,19 @@ public class EmailService : IEmailService
 {
     private readonly IWebHostEnvironment _environment;
     private readonly IConfiguration _configuration;
-    private readonly EmailMessageBuilder _builder;
+    private readonly IEmailMessageBuilder _emailMessageBuilder;
+    private readonly IQRCodeGeneratorService _qrCodeGeneratorService;
 
-    public EmailService(IWebHostEnvironment environment, IConfiguration configuration)
+    public EmailService(
+        IWebHostEnvironment environment, 
+        IConfiguration configuration, 
+        IEmailMessageBuilder emailMessageBuilder, 
+        IQRCodeGeneratorService qRCodeGeneratorService)
     {
         _environment = environment;
         _configuration = configuration;
-        _builder = new EmailMessageBuilder(environment);
+        _emailMessageBuilder = emailMessageBuilder;
+        _qrCodeGeneratorService = qRCodeGeneratorService;
     }
 
     public async Task SendWelcomeEmailAsync(string recipientEmail, string recipientName, CancellationToken cancellationToken = default)
@@ -63,6 +71,39 @@ public class EmailService : IEmailService
         var message = builder.Build();
         await SendEmailAsync(message, cancellationToken);
     }
+
+    public async Task SendCustomEmailAsync(
+        string recipientEmail,
+        string recipientName,
+        string subject,
+        string htmlContent,
+        QRDataBuilder qrDataBuilder,
+        string qrCodeAltText = "QR Code",
+        int qrCodeSize = 20,
+        string attachmentPath = null,
+        CancellationToken cancellationToken = default)
+    {
+        string qrData = qrDataBuilder.Build();
+
+        byte[] qrCodeBytes = _qrCodeGeneratorService.GenerateQRCode(qrData, qrCodeSize, "#000000", "#FFFFFF");
+
+        var builder = new EmailMessageBuilder(_environment)
+            .SetFrom(_configuration["EmailSettings:FromName"], _configuration["EmailSettings:Username"])
+            .AddTo(recipientName, recipientEmail)
+            .SetSubject(subject)
+            .AddImageLogo()
+            .SetHtmlBody(htmlContent)
+            .AddQRCode(qrCodeBytes);
+
+        if (!string.IsNullOrEmpty(attachmentPath))
+        {
+            builder.AddAttachment(attachmentPath);
+        }
+
+        var message = builder.Build();
+        await SendEmailAsync(message, cancellationToken);
+    }
+
 
     public async Task SendPasswordChangeConfirmationEmailAsync(string recipientEmail, string recipientName, CancellationToken cancellationToken = default)
     {
