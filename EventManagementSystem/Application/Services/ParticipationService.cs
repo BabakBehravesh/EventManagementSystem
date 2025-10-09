@@ -1,5 +1,6 @@
 ﻿namespace EventManagementSystem.Application.Services;
 
+using EventManagementSystem.Application.DTOs;
 using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Domain.Models;
 using EventManagementSystem.Infrastructure.QrCode;
@@ -17,27 +18,27 @@ public class ParticipationService : IParticipationService
         _emailService = emailService;
     }
 
-    public async Task<ParticipationResult> ParticipateInEventAsync(int eventId, Participation registration)
+    public async Task<ServiceResult<Participation>> ParticipateInEventAsync(int eventId, Participation participation)
     {
         var eventEntity = await _context.Events.FindAsync(eventId);
         if (eventEntity == null)
-            return new ParticipationResult(false, Message: "Event not found.");
+            return ServiceResult<Participation>.FailureResult("Event not found.");
 
-        var alreadyRegistered = await _context.Registrations.AnyAsync(r => r.EventId == eventId && r.Email == registration.Email.ToLower());
+        var alreadyRegistered = await _context.Participations.AnyAsync(r => r.EventId == eventId && r.Email == participation.Email.ToLower());
         if (alreadyRegistered)
-            return new ParticipationResult(false, Message: "You have been already refistered to this event.");
+            return ServiceResult<Participation>.FailureResult("You have been already refistered to this event.");
 
-        registration.EventId = eventId; 
-        _context.Registrations.Add(registration);
+        participation.EventId = eventId; 
+        _context.Participations.Add(participation);
         await _context.SaveChangesAsync();
 
-        await SendTicketAsEmailAsync(registration);
-        return new ParticipationResult(true, registration, "Registered successfully!");
+        await SendTicketAsEmailAsync(participation);
+        return ServiceResult<Participation>.SuccessResult(participation, "Registered successfully!");
     }
 
     public async Task<IEnumerable<Participation>> GetParticipantsInEventAsync(int eventId)
     {
-        return await _context.Registrations
+        return await _context.Participations
             .Include(r => r.Event)
             .Where(r => r.EventId == eventId)
             .ToListAsync();

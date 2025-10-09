@@ -12,7 +12,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     }
 
     public DbSet<Event> Events => Set<Event>();
-    public DbSet<Participation> Registrations => Set<Participation>();
+    public DbSet<Participation> Participations => Set<Participation>();
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -1,9 +1,11 @@
-﻿using EventManagementSystem.Application.DTOs.Auth;
+﻿using EventManagementSystem.Application.DTOs;
+using EventManagementSystem.Application.DTOs.Auth;
 using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 
 namespace EventManagementSystem.Controllers;
 
@@ -56,12 +58,12 @@ public class AuthController : ControllerBase
 
     [Authorize]
     [HttpPost("change-password")]
-    public async Task<ActionResult<AuthResult>> ChangePassword([FromBody] ChangePasswordRequest model)
+    public async Task<ServiceResult<UserInfo>> ChangePassword([FromBody] ChangePasswordRequest model)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(AuthResult.ValidationFailure(
-                ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage))));
+            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+            return ServiceResult<UserInfo>.ValidationFailure(errors);
         }
 
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
@@ -90,7 +92,7 @@ public class AuthController : ControllerBase
 
         if (result.Success)
         {
-            return Ok(new { Message = result.Message, User = result!.UserInfo  });
+            return Ok(new { Message = result.Message, User = result!.Data });
         }
         return BadRequest(result);
     }

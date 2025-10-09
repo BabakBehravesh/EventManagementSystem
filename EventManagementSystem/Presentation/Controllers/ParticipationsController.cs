@@ -47,7 +47,7 @@ public class ParticipationsController : ControllerBase
         if (!participationResult.Success) return BadRequest();
 
 
-        var result = _mapper.Map<ParticipationResponse>(participationResult.Participation);
+        var result = _mapper.Map<ParticipationResponse>(participationResult.Data);
 
         return Ok(result);
     }

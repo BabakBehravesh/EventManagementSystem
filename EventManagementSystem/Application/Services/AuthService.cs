@@ -1,4 +1,5 @@
-﻿using EventManagementSystem.Application.DTOs.Auth;
+﻿using EventManagementSystem.Application.DTOs;
+using EventManagementSystem.Application.DTOs.Auth;
 using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Domain.Models;
 using Microsoft.AspNetCore.Identity;
@@ -26,7 +27,7 @@ public class AuthService : IAuthService
         _logger = logger;
     }
 
-    public async Task<AuthResult> RegisterAsync(RegisterRequest request, ApplicationUser registerer)
+    public async Task<ServiceResult<UserInfo>> RegisterAsync(RegisterRequest request, ApplicationUser registerer)
     {
         try
         {
@@ -34,7 +35,7 @@ public class AuthService : IAuthService
 
             if (existingUser != null)
             {
-                return AuthResult.FailureResult("User with this email already exists.");
+                return ServiceResult<UserInfo>.FailureResult("User with this email already exists.");
             }
             
             var user = new ApplicationUser
@@ -53,7 +54,7 @@ public class AuthService : IAuthService
 
             if (!result.Succeeded)
             {
-                return AuthResult.FailureResult("Failed to create user.", result.Errors);
+                return ServiceResult<UserInfo>.FailureResult("Failed to create user.", result.Errors.Select(err => err.Description.ToString()).ToList());
             }
 
             foreach (var role in request.UserRoles)
@@ -67,23 +68,32 @@ public class AuthService : IAuthService
 
             _logger.LogInformation($"User {user.Email} registered with roles: {string.Join(", ", request.UserRoles)}");
 
-            return AuthResult.SuccessResult("User registered successfully!");
+
+            UserInfo userInfo = new()
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                Roles = [.. request.UserRoles.Select(r => r.ToString())]
+            };
+
+            return ServiceResult<UserInfo>.SuccessResult(userInfo, "User registered successfully!");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, $"Error registering user {request.Email}");
-            return AuthResult.FailureResult("An error occurred while registering the user.");
+            return ServiceResult<UserInfo>.FailureResult("An error occurred while registering the user.");
         }
     }
 
-    public async Task<AuthResult> ChangePasswordAsync(string userId, ChangePasswordRequest request)
+    public async Task<ServiceResult<UserInfo>> ChangePasswordAsync(string userId, ChangePasswordRequest request)
     {
         try
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                return AuthResult.FailureResult("User not found.");
+                return ServiceResult<UserInfo>.FailureResult("User not found.");
             }
 
             var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
@@ -94,24 +104,31 @@ public class AuthService : IAuthService
 
                 await _emailService.SendPasswordChangeConfirmationEmailAsync(user.Email, user.UserName);
 
-                return AuthResult.SuccessResult("Password changed successfully.");
+                UserInfo userInfo = new()
+                {
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Email = user.Email,
+                };
+
+                return ServiceResult<UserInfo>.SuccessResult(userInfo, "Password changed successfully." );
             }
 
-            return AuthResult.FailureResult("Failed to change password.", result.Errors);
+            return ServiceResult<UserInfo>.FailureResult("Failed to change password.", result.Errors.Select(err => err.Description).ToList());
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, $"Error changing password for user {userId}");
-            return AuthResult.FailureResult("An error occurred while changing password.");
+            return ServiceResult<UserInfo>.FailureResult("An error occurred while changing password.");
         }
     }
 
-    public async Task<AuthResult> ChangeUserProfileAsync(string userId, UserProfileRequest model)
+    public async Task<ServiceResult<UserInfo>> ChangeUserProfileAsync(string userId, UserProfileRequest model)
     {
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
         {
-            return AuthResult.FailureResult("User not found.");
+            return ServiceResult<UserInfo>.FailureResult("User not found.");
         }
 
         user.FirstName = model.FirstName;
@@ -119,20 +136,27 @@ public class AuthService : IAuthService
 
         var result = await _userManager.UpdateAsync(user);
         
+        UserInfo userInfo = new()
+        {
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email
+        };
+
         if (result.Succeeded)
         {
-            return AuthResult.SuccessResult("User profile updated successfully.");
+            return ServiceResult<UserInfo>.SuccessResult(userInfo, "User profile updated successfully.");
         }
 
-        return AuthResult.FailureResult("Failed to update user profile.", result.Errors);
+        return ServiceResult<UserInfo>.FailureResult("Failed to update user profile.", result.Errors.Select(err => err.Description).ToList());
     }
 
-    public async Task<AuthResult> LoadUserProfileAsync(string userId)
+    public async Task<ServiceResult<UserInfo>> LoadUserProfileAsync(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
         {
-            return AuthResult.FailureResult("User not found.");
+            return ServiceResult<UserInfo>.FailureResult("User not found.");
         }
 
         user.FirstName = user.FirstName;
@@ -145,37 +169,52 @@ public class AuthService : IAuthService
             Email = user.Email
         };
 
-        return AuthResult.SuccessResult("User profile updated successfully.","", userInfo);
+        return ServiceResult<UserInfo>.SuccessResult(userInfo, "User profile updated successfully.");
     }
 
-    public async Task<AuthResult> DeleteUserAsync(string userId)
+    public async Task<ServiceResult<UserInfo>> DeleteUserAsync(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
         {
-            return AuthResult.FailureResult("User not found.");
+            return ServiceResult<UserInfo>.FailureResult("User not found.");
         }
 
         var result = await _userManager.DeleteAsync(user);
+        
+        UserInfo userInfo = new()
+        {
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email
+        };
 
         if (result.Succeeded)
         { 
-            return AuthResult.SuccessResult($"User {user.Email} deleted successfully.");
+            return ServiceResult<UserInfo>.SuccessResult(userInfo, $"User {user.Email} deleted successfully.");
         }
 
-        return AuthResult.FailureResult($"Failed to delete user: {user.Email}", result.Errors);
+        return ServiceResult<UserInfo>.FailureResult($"Failed to delete user: {user.Email}", result.Errors.Select(err => err.Description).ToList());
     }
 
-    public async Task<AuthResult> LoginAsync(LoginRequest request)
+    public async Task<ServiceResult<UserInfo>> LoginAsync(LoginRequest request)
     {
         var user = await _userManager.FindByEmailAsync(request.Email);
         if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
-            return AuthResult.FailureResult("Invalid login attempt.");
+            return ServiceResult<UserInfo>.FailureResult("Invalid login attempt.");
 
         var roles = await _userManager.GetRolesAsync(user);
         var token = _jwtTokenGenerator.GenerateToken(user, roles);
 
-        return AuthResult.SuccessResult("Login successful!", token);
+        UserInfo userInfo = new()
+        {
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email,
+            Roles = roles.ToList(),
+        }; 
+
+        return ServiceResult<UserInfo>.AuthSuccessResult(userInfo, token, "Login successful!");
     }
 
     private static string GenerateRandomPassword()

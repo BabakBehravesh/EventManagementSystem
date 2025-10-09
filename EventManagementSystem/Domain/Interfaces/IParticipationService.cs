@@ -1,10 +1,11 @@
-﻿using EventManagementSystem.Domain.Models;
+﻿using EventManagementSystem.Application.DTOs;
+using EventManagementSystem.Domain.Models;
 
 namespace EventManagementSystem.Domain.Interfaces;
 
 public interface IParticipationService
 {
-    Task<ParticipationResult> ParticipateInEventAsync(int eventId, Participation registration);
+    Task<ServiceResult<Participation>> ParticipateInEventAsync(int eventId, Participation registration);
     Task<IEnumerable<Participation>> GetParticipantsInEventAsync(int eventId);
 }
 

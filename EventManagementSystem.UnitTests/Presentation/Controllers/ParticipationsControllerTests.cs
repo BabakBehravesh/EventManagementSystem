@@ -132,11 +132,10 @@ public class ParticipationsControllerTests
         var eventEntity = new Event { Id = eventId, Name = "Test Event", CreatedBy = "Bob@gmail.com" };
         registrationEntity.Event = eventEntity;
 
-        var registrationResult = new ParticipationResult
+        var registrationResult = ServiceResult<Participation>.SuccessResult
         (
-            Success: true,
-            Participation: registrationEntity, 
-            Message: "Participation successful"
+            registrationEntity, 
+            "Participation successful"
         );
 
         _mockRegistrationService
@@ -195,11 +194,10 @@ public class ParticipationsControllerTests
             Event = new Event { Id = eventId, Name = "Test Event", CreatedBy = "Bob@gmail.com" }
         };
 
-        var registrationResult = new ParticipationResult
+        var registrationResult = ServiceResult<Participation>.SuccessResult
         (
-            Success: true,
-            Participation: registrationEntity, 
-            Message: "Participation successful"
+            registrationEntity, 
+            "Participation successful"
         );
 
         _mockRegistrationService
@@ -245,11 +243,10 @@ public class ParticipationsControllerTests
             Event = new Event { Id = eventId, Name = "Test Event", CreatedBy = "Bob@gmail.com" }
         };
 
-        var registrationResult = new ParticipationResult
+        var registrationResult = ServiceResult<Participation>.SuccessResult
                 (
-                    Success: true,
-                    Participation: registrationEntity,
-                    Message: "Participation successful"
+                    registrationEntity,
+                    "Participation successful"
                 );
 
         _mockRegistrationService

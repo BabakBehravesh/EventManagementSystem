@@ -1,4 +1,5 @@
-﻿using EventManagementSystem.Domain.Interfaces;
+﻿using EventManagementSystem.Application.DTOs;
+using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Domain.Models;
 using EventManagementSystem.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
@@ -22,34 +23,35 @@ public class EventService : IEventService
             .ToListAsync();
     }
 
-    public async Task<Event> GetEventByIdAsync(int eventId)
+    public async Task<ServiceResult<Event>> GetEventByIdAsync(int eventId)
     {
         var eventEntity = await _context.Events.FirstOrDefaultAsync(e => e.Id == eventId);
 
         if (eventEntity == null)
         {
-            throw new InvalidOperationException($"Event with ID {eventId} was not found.");
+            return ServiceResult<Event>.FailureResult($"Event with ID {eventId} was not found.");
         }
 
-        return eventEntity;
+        return ServiceResult<Event>.SuccessResult(eventEntity);
     }
 
-    public async Task<IEnumerable<Participation>> GetEventParticipantsAsync(int eventId)
+    public async Task<ServiceResult<IEnumerable<Participation>>> GetEventParticipantsAsync(int eventId)
     {
         var eventObject = await _context.Events.FirstOrDefaultAsync(e => e.Id == eventId);
 
         if (eventObject == null)
         {
-            throw new InvalidOperationException($"Event with Id '{eventId}' not found");
+            return ServiceResult<IEnumerable<Participation>>.FailureResult($"Event with Id '{eventId}' not found");
         }
 
-        return await _context.Registrations
-            .Where(r => r.EventId == eventObject.Id)
-            .AsNoTracking()
-            .ToListAsync();
+        return ServiceResult<IEnumerable<Participation>>.SuccessResult(
+            await _context.Participations
+                .Where(r => r.EventId == eventObject.Id)
+                .AsNoTracking()
+                .ToListAsync());
     }
 
-    public async Task<Event> CreateEventAsync(Event newEvent, string createdBy)
+    public async Task<ServiceResult<Event>> CreateEventAsync(Event newEvent, string createdBy)
     {
         var existingEvent = await _context.Events
             .FirstOrDefaultAsync(e =>
@@ -59,7 +61,7 @@ public class EventService : IEventService
 
         if (existingEvent != null)
         {
-            throw new Exception($"An event with the same name, time, and location already exists.");
+            ServiceResult<Event>.FailureResult($"An event with the same name, time, and location already exists.");
         }
 
         newEvent.CreatedBy = createdBy;
@@ -67,6 +69,6 @@ public class EventService : IEventService
         _context.Events.Add(newEvent);
         await _context.SaveChangesAsync();
 
-        return newEvent;
+        return ServiceResult<Event>.SuccessResult(newEvent);
     }
 }

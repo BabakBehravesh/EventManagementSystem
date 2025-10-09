@@ -1,4 +1,5 @@
-﻿using EventManagementSystem.Domain.Models;
+﻿using EventManagementSystem.Application.DTOs;
+using EventManagementSystem.Domain.Models;
 
 namespace EventManagementSystem.Domain.Interfaces;
 
@@ -6,9 +7,9 @@ public interface IEventService
 {
     Task<IEnumerable<Event>> GetAllEventsAsync();
 
-    Task<Event> GetEventByIdAsync(int id);
+    Task<ServiceResult<Event>> GetEventByIdAsync(int eventId);
 
-    Task<Event> CreateEventAsync(Event newEvent, string createdBy);
+    Task<ServiceResult<Event>> CreateEventAsync(Event newEvent, string createdBy);
 
-    Task<IEnumerable<Participation>> GetEventParticipantsAsync(int eventId); 
+    Task<ServiceResult<IEnumerable<Participation>>> GetEventParticipantsAsync(int eventId); 
 }

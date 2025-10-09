@@ -16,7 +16,7 @@ if (builder.Environment.IsDevelopment())
     builder.Configuration.AddUserSecrets<Program>();
 }
 
-// Service Registrations (Grouped)
+// Service Participations (Grouped)
 builder.Services.AddEventManagementServices(builder.Configuration);
 
 
