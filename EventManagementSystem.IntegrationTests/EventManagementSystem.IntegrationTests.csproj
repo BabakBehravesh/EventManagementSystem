@@ -5,9 +5,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
-    <PreserveCompilationContext>true</PreserveCompilationContext>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <ShadowCopy>false</ShadowCopy>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,11 +28,11 @@
     <Folder Include="Application\Fakes\" />
   </ItemGroup>
 
-  <Target Name="CopyDepsFile" AfterTargets="Build">
+  <Target Name="CopyAppDeps" AfterTargets="Build">
     <ItemGroup>
-      <DepsFile Include="$(SolutionDir)EventManagementSystem\bin\$(Configuration)\net9.0\EventManagementSystem.deps.json" />
+      <AppDepsFile Include="..\EventManagementSystem\bin\$(Configuration)\net9.0\EventManagementSystem.deps.json" />
     </ItemGroup>
-    <Copy SourceFiles="@(DepsFile)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(AppDepsFile)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
   </Target>
 
 </Project>
