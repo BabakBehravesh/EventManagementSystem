@@ -12,7 +12,8 @@ public class ParticipationMappingProfile : Profile
         // DTO to Model
         CreateMap<ParticipationRequest, Participation>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.EventId, opt => opt.Ignore());
+            .ForMember(dest => dest.EventId, opt => opt.Ignore())
+            .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber ?? string.Empty));
 
         // Model to DTO
         CreateMap<Participation, ParticipationResponse>()

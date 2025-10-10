@@ -2,6 +2,7 @@
 using EventManagementSystem.Application.DTOs;
 using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Domain.Models;
+using EventManagementSystem.UnitTests.Common;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -10,10 +11,9 @@ using Xunit;
 
 namespace EventManagementSystem.Presentation.Controllers.UnitTests;
 
-public class ParticipationsControllerTests
+public class ParticipationsControllerTests : TestBase
 {
     private readonly Mock<IParticipationService> _mockRegistrationService;
-    private readonly IMapper mapper;
     private readonly ParticipationsController _controller;
     private readonly Mock<ILogger<ParticipationsController>> _mockLogger;
 
@@ -21,7 +21,7 @@ public class ParticipationsControllerTests
     {
         _mockRegistrationService = new Mock<IParticipationService>();
         _mockLogger = new Mock<ILogger<ParticipationsController>>();
-        _controller = new ParticipationsController(_mockRegistrationService.Object, mapper);
+        _controller = new ParticipationsController(_mockRegistrationService.Object, Mapper);
     }
 
     [Fact]
@@ -31,23 +31,21 @@ public class ParticipationsControllerTests
         var eventId = 1;
         var registrations = new List<Participation>
         {
-            new Participation
-            {
+            new() {
                 Id = 1,
                 Name = "John Doe",
                 Email = "john@example.com",
                 PhoneNumber = "123-456-7890",
                 EventId = eventId,
-                Event = new Event { Id = eventId, Name = "Test Event", CreatedBy = "Bob@gmail.com" }
+                Event = new Event { Id = eventId, Name = "Test Event", CreatedBy = "bob@gmail.com" }
             },
-            new Participation
-            {
+            new() {
                 Id = 2,
                 Name = "Jane Smith",
                 Email = "jane@example.com",
                 PhoneNumber = "098-765-4321",
                 EventId = eventId,
-                Event = new Event { Id = eventId, Name = "Test Event", CreatedBy = "Alice@gmail.com" }
+                Event = new Event { Id = eventId, Name = "Test Event", CreatedBy = "alice@gmail.com" }
             }
         };
 
@@ -191,7 +189,7 @@ public class ParticipationsControllerTests
             Email = request.Email,
             PhoneNumber = string.Empty, // Should be handled as empty string
             EventId = eventId,
-            Event = new Event { Id = eventId, Name = "Test Event", CreatedBy = "Bob@gmail.com" }
+            Event = new Event { Id = eventId, Name = "Test Event", CreatedBy = "bob@gmail.com" }
         };
 
         var registrationResult = ServiceResult<Participation>.SuccessResult
