@@ -24,6 +24,20 @@
                 );
             });
 
+            services.AddMemoryCache(options =>
+            {
+                options.SizeLimit = 100 * 1024 * 1024; // 100MB
+                options.CompactionPercentage = 0.25;
+                options.ExpirationScanFrequency = TimeSpan.FromSeconds(30);
+            });
+
+            services.AddResponseCaching(options =>
+            {
+                options.MaximumBodySize = 1024 * 1024;
+                options.UseCaseSensitivePaths = false;
+                options.SizeLimit = 100 * 1024 * 1024;
+            });
+
             // Controllers
             services.AddControllers();
 

@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddMemoryCache();
+
+
 // Configuration
 builder.Configuration
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -21,6 +24,9 @@ builder.Services.AddEventManagementServices(builder.Configuration);
 
 
 var app = builder.Build();
+
+app.UseResponseCaching();
+
 
 // Database Initialization
 using (var scope = app.Services.CreateScope())
