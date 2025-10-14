@@ -48,13 +48,14 @@ public class  ServiceResult<T>: ServiceResult
         };
     }
 
-    public static new ServiceResult<T> FailureResult(string message = "", IEnumerable<string>? errors = null)
+    public static new ServiceResult<T> FailureResult(string message = "", IEnumerable<string>? errors = null, int statusCode = 400)
     {
         return new ServiceResult<T>
         {
             Success = false,
             Message = message,
-            Errors = errors ?? []
+            Errors = errors ?? [],
+            StatusCode = statusCode
         };
     }
 

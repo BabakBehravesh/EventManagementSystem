@@ -2,10 +2,12 @@
 using EventManagementSystem.Application.DTOs;
 using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Domain.Models;
+using EventManagementSystem.Presentation.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using System.Collections.Generic;
 using System.Security.Claims;
 
 namespace EventManagementSystem.Controllers;
@@ -33,11 +35,11 @@ public class EventsController : ControllerBase
     [HttpGet]
     [ResponseCache(Location = ResponseCacheLocation.Any , Duration = 60)]
     [Authorize]
-    public async Task<ActionResult<IEnumerable<EventResponse>>> GetEventsAsync()
+    public async Task<ActionResult<ApiResponse<IEnumerable<EventResponse>>>> GetEventsAsync()
     {
         if (!ModelState.IsValid)
-        {  
-            return BadRequest(ModelState); 
+        {
+            return BadRequest(ApiResponse.ValidationFailure(ModelState.GetErrors())); 
         }
 
         _requestCount++;
@@ -59,35 +61,40 @@ public class EventsController : ControllerBase
             _memoryCache.Set(cacheKey, cachedMemory, cacheOptions);
         }
 
-        return Ok(cachedMemory);
+        return Ok(ApiResponse<IEnumerable<EventResponse>>.SuccessResult(cachedMemory));
     }
 
-    [HttpGet("{eventId:int}", Name = "GetEventById")]
+    [HttpGet("{eventId:int}", Name = "GetEventByIdAsync")]
     [Authorize]
-    public async Task<ActionResult<EventResponse>> GetEventByIdAsync(int eventId)
+    public async Task<ActionResult<ApiResponse<EventResponse>>> GetEventByIdAsync(int eventId)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ApiResponse.ValidationFailure(ModelState.GetErrors()));
+        }
+
         var eventObject = await _eventService.GetEventByIdAsync(eventId);
         if (eventObject == null)
-            return NotFound();
+            return NotFound(ApiResponse<EventResponse>.FailureResult("EventId not found"));
 
         var eventResponse = _mapper.Map<EventResponse>(eventObject.Data);
-        return Ok(eventResponse);
+        return Ok(ApiResponse<EventResponse>.SuccessResult(eventResponse));
     }
 
     [HttpPost]
     [Authorize(Roles = "EventCreator")]
-    public async Task<ActionResult<EventResponse>> CreateEventAsync(EventRequest newEvent)
+    public async Task<ActionResult<ApiResponse<EventResponse>>> CreateEventAsync(EventRequest newEvent)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ModelState);
+            return BadRequest(ApiResponse.ValidationFailure(ModelState.GetErrors()));
         }
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (string.IsNullOrEmpty(userId))
         {
-            return Unauthorized("User identity is invalid or not found.");
+            return Unauthorized(ApiResponse.FailureResult("User identity is invalid or not found."));
         }
 
         try
@@ -100,12 +107,14 @@ public class EventsController : ControllerBase
 
             return CreatedAtAction(
                 null,
-                eventResponse
+                ApiResponse<EventResponse>.SuccessResult(
+                    eventResponse,
+                    "Event created successfully")
             );
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(ApiResponse.FailureResult(ex.Message));
         }
     }
 }

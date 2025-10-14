@@ -22,11 +22,20 @@ public class ParticipationService : IParticipationService
     {
         var eventEntity = await _context.Events.FindAsync(eventId);
         if (eventEntity == null)
+        { 
             return ServiceResult<Participation>.FailureResult("Event not found.");
+        }
+
+        if (eventEntity.StartTime < DateTime.Now)
+        { 
+            return ServiceResult<Participation>.FailureResult("Cannot register for past events.");
+        }
 
         var alreadyRegistered = await _context.Participations.AnyAsync(r => r.EventId == eventId && r.Email == participation.Email.ToLower());
         if (alreadyRegistered)
+        { 
             return ServiceResult<Participation>.FailureResult("You have been already refistered to this event.");
+        }
 
         participation.EventId = eventId; 
         _context.Participations.Add(participation);

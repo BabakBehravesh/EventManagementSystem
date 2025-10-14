@@ -1,4 +1,5 @@
 ﻿namespace EventManagementSystem;
+
 using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Infrastructure.Email;
 using EventManagementSystem.Infrastructure.QrCode;

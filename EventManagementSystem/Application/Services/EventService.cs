@@ -61,7 +61,7 @@ public class EventService : IEventService
 
         if (existingEvent != null)
         {
-            ServiceResult<Event>.FailureResult($"An event with the same name, time, and location already exists.");
+            return ServiceResult<Event>.FailureResult($"An event with the same name, time, and location already exists.", statusCode: 400);
         }
 
         newEvent.CreatedBy = createdBy;

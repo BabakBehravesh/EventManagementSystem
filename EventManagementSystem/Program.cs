@@ -1,5 +1,4 @@
 using EventManagementSystem;
-using EventManagementSystem.Domain.Models;
 using EventManagementSystem.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
 
