@@ -1,9 +1,9 @@
 ﻿using EventManagementSystem.Domain.Interfaces;
+using EventManagementSystem.Infrastructure.Storage;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
-using System;
 
 
 namespace EventManagementSystem.IntegrationTests
@@ -26,6 +26,16 @@ namespace EventManagementSystem.IntegrationTests
 
                 services.AddTransient<IEmailService, FakeEmailService>();
             });
+        }
+
+
+        public static ApplicationDbContext GetInMemoryDbContext(string dbName)
+        {
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(dbName)
+                .Options;
+
+            return new ApplicationDbContext(options);
         }
     }
 }

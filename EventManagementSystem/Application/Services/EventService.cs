@@ -3,6 +3,7 @@ using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Domain.Models;
 using EventManagementSystem.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
+using MimeKit.Cryptography;
 
 
 namespace EventManagementSystem.Application.Services;
@@ -16,7 +17,7 @@ public class EventService : IEventService
         _context = context;
     }
 
-    public async Task<(IEnumerable<Event>, int)> GetAllEventsAsync(int pageNumber, int pageSize)
+    public async Task<(IEnumerable<Event>, int)> GetEventsAsync(int pageNumber, int pageSize)
     {
         if (pageNumber <= 0) pageNumber = 1;
         if (pageSize <= 0) pageSize = 10;
@@ -40,7 +41,7 @@ public class EventService : IEventService
 
         if (eventEntity == null)
         {
-            return ServiceResult<Event>.FailureResult($"Event with ID {eventId} was not found.");
+            return ServiceResult<Event>.FailureResult($"Event with ID {eventId} was not found.", [$"Event with ID {eventId} was not found."]);
         }
 
         return ServiceResult<Event>.SuccessResult(eventEntity);
@@ -72,7 +73,7 @@ public class EventService : IEventService
 
         if (existingEvent != null)
         {
-            return ServiceResult<Event>.FailureResult($"An event with the same name, time, and location already exists.", statusCode: 400);
+            return ServiceResult<Event>.FailureResult("An event with the same name, start time and location already exists.", statusCode: 400);
         }
 
         newEvent.CreatedBy = createdBy;
@@ -80,6 +81,6 @@ public class EventService : IEventService
         _context.Events.Add(newEvent);
         await _context.SaveChangesAsync();
 
-        return ServiceResult<Event>.SuccessResult(newEvent);
+        return ServiceResult<Event>.SuccessResult(newEvent, "Event created successfully!");
     }
 }

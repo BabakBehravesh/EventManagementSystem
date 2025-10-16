@@ -11,11 +11,13 @@ public class ParticipationService : IParticipationService
 {
     private readonly ApplicationDbContext _context;
     private readonly IEmailService _emailService;
+    private readonly IEventService _eventService;
 
-    public ParticipationService(ApplicationDbContext context, IEmailService emailService)
+    public ParticipationService(ApplicationDbContext context, IEmailService emailService, IEventService eventService)
     {
         _context = context;
         _emailService = emailService;
+        _eventService = eventService;
     }
 
     public async Task<ServiceResult<Participation>> ParticipateInEventAsync(int eventId, Participation participation)
@@ -49,10 +51,19 @@ public class ParticipationService : IParticipationService
     {
         try
         {
+            var eventObject = await _eventService.GetEventByIdAsync(eventId);
+
             var participants = await _context.Participations
                 .Include(r => r.Event)
                 .Where(r => r.EventId == eventId)
                 .ToListAsync();
+
+            if (participants.Count == 0)
+            {
+                return ServiceResult<IEnumerable<Participation>>.FailureResult(
+                    "No participants for this event.", 
+                    eventObject?.Errors);
+            }
 
             return ServiceResult<IEnumerable<Participation>>.SuccessResult(participants, $"Participants for event: {eventId} retrieved successfully!");
         }

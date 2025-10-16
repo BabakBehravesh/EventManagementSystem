@@ -8,5 +8,3 @@ public interface IParticipationService
     Task<ServiceResult<Participation>> ParticipateInEventAsync(int eventId, Participation registration);
     Task<ServiceResult<IEnumerable<Participation>>> GetParticipantsInEventAsync(int eventId);
 }
-
-public record ParticipationResult(bool Success, Participation? Participation = null, string Message = "");

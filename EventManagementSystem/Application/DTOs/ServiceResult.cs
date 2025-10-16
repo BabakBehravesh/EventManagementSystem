@@ -48,16 +48,36 @@ public class  ServiceResult<T>: ServiceResult
         };
     }
 
-    public static new ServiceResult<T> FailureResult(string message = "", IEnumerable<string>? errors = null, int statusCode = 400)
+    public static new ServiceResult<T> FailureResult(
+        string message = "",
+        IEnumerable<string>? errors = null,
+        int statusCode = 400)
     {
+        var mergedErrors = new List<string>();
+
+        // Always include the message as an error if it's non-empty
+        if (!string.IsNullOrWhiteSpace(message))
+            mergedErrors.Add(message);
+
+        // Add any existing errors
+        if (errors != null)
+            mergedErrors.AddRange(errors.Where(e => !string.IsNullOrWhiteSpace(e)));
+
+        // Remove duplicates and nulls
+        var distinctErrors = mergedErrors
+            .Where(e => !string.IsNullOrWhiteSpace(e))
+            .Distinct()
+            .ToList();
+
         return new ServiceResult<T>
         {
             Success = false,
             Message = message,
-            Errors = errors ?? [],
+            Errors = distinctErrors,
             StatusCode = statusCode
         };
     }
+
 
     public static ServiceResult<T> AuthSuccessResult(T data, string token, string message = "")
     {

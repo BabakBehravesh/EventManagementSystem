@@ -2,6 +2,7 @@
 using EventManagementSystem.Application.DTOs;
 using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Domain.Models;
+using EventManagementSystem.Presentation.DTOs;
 using EventManagementSystem.UnitTests.Common;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
@@ -37,7 +38,7 @@ public class ParticipationsControllerTests : TestBase
                 Email = "john@example.com",
                 PhoneNumber = "123-456-7890",
                 EventId = eventId,
-                Event = new Event { Id = eventId, Name = "Test Event", CreatedBy = "bob@gmail.com" }
+                Event = new Event { Id = eventId, Name = "Test Event", CreatedBy = "bob@gmail.com", StartTime = DateTime.UtcNow.AddDays(1) }
             },
             new() {
                 Id = 2,
@@ -45,25 +46,27 @@ public class ParticipationsControllerTests : TestBase
                 Email = "jane@example.com",
                 PhoneNumber = "098-765-4321",
                 EventId = eventId,
-                Event = new Event { Id = eventId, Name = "Test Event", CreatedBy = "alice@gmail.com" }
+                Event = new Event { Id = eventId, Name = "Test Event", CreatedBy = "alice@gmail.com", StartTime = DateTime.UtcNow.AddDays(1)}
             }
         };
 
+        var serviceResult = ServiceResult<IEnumerable<Participation>>.SuccessResult(registrations, "Participants retrieved successfully");
+
         _mockRegistrationService
             .Setup(service => service.GetParticipantsInEventAsync(eventId))
-            .ReturnsAsync(registrations);
+            .ReturnsAsync(serviceResult);
 
         // Act
         var result = await _controller.GetParticipantsInEvent(eventId);
 
         // Assert
-        result.Result.Should().BeOfType<OkObjectResult>();
-        var okResult = result.Result as OkObjectResult;
-        var response = okResult?.Value as IEnumerable<ParticipationResponse>;
+        result.Should().BeOfType<OkObjectResult>();
+        var okResult = result as OkObjectResult;
+        var response = okResult?.Value as ApiResponse<IEnumerable<ParticipationResponse>>;
 
-        response.Should().HaveCount(2);
-        response.Should().Contain(r => r.Name == "John Doe");
-        response.Should().Contain(r => r.Name == "Jane Smith");
+        response.Data.Should().HaveCount(2);
+        response.Data.Should().Contain(r => r.Name == "John Doe");
+        response.Data.Should().Contain(r => r.Name == "Jane Smith");
 
         _mockRegistrationService.Verify(service => service.GetParticipantsInEventAsync(eventId), Times.Once);
     }
@@ -73,7 +76,7 @@ public class ParticipationsControllerTests : TestBase
     {
         // Arrange
         var eventId = 1;
-        var emptyRegistrations = new List<Participation>();
+        var emptyRegistrations = new ServiceResult<IEnumerable<Participation>>();
 
         _mockRegistrationService
             .Setup(service => service.GetParticipantsInEventAsync(eventId))
@@ -83,11 +86,11 @@ public class ParticipationsControllerTests : TestBase
         var result = await _controller.GetParticipantsInEvent(eventId);
 
         // Assert
-        result.Result.Should().BeOfType<OkObjectResult>();
-        var okResult = result.Result as OkObjectResult;
-        var response = okResult?.Value as IEnumerable<ParticipationResponse>;
+        result.Should().BeOfType<NotFoundObjectResult>();
+        var NotFoundResult = result as NotFoundObjectResult;
+        var response = NotFoundResult?.Value as IEnumerable<ParticipationResponse>;
 
-        response.Should().BeEmpty();
+        response.Should().BeNull();
         _mockRegistrationService.Verify(service => service.GetParticipantsInEventAsync(eventId), Times.Once);
     }
 
@@ -149,17 +152,17 @@ public class ParticipationsControllerTests : TestBase
         var result = await _controller.Participate(eventId, request);
 
         // Assert
-        result.Result.Should().BeOfType<OkObjectResult>();
-        var okResult = result.Result as OkObjectResult;
-        var response = okResult?.Value as ParticipationResponse;
+        result.Should().BeOfType<OkObjectResult>();
+        var okResult = result as OkObjectResult;
+        var response = okResult?.Value as ApiResponse<ParticipationResponse>;
 
         response.Should().NotBeNull();
-        response.Id.Should().Be(1);
-        response.Name.Should().Be("John Doe");
-        response.Email.Should().Be("john@example.com");
-        response.PhoneNumber.Should().Be("123-456-7890");
-        response.EventId.Should().Be(eventId);
-        response.EventName.Should().Be("Test Event");
+        response.Data.Id.Should().Be(1);
+        response.Data.Name.Should().Be("John Doe");
+        response.Data.Email.Should().Be("john@example.com");
+        response.Data.PhoneNumber.Should().Be("123-456-7890");
+        response.Data.EventId.Should().Be(eventId);
+        response.Data.EventName.Should().Be("Test Event");
 
         _mockRegistrationService.Verify(service => service.ParticipateInEventAsync(
             eventId,
@@ -211,12 +214,12 @@ public class ParticipationsControllerTests : TestBase
         var result = await _controller.Participate(eventId, request);
 
         // Assert
-        result.Result.Should().BeOfType<OkObjectResult>();
-        var okResult = result.Result as OkObjectResult;
-        var response = okResult?.Value as ParticipationResponse;
+        result.Should().BeOfType<OkObjectResult>();
+        var okResult = result as OkObjectResult;
+        var response = okResult?.Value as ApiResponse<ParticipationResponse>;
 
         response.Should().NotBeNull();
-        response.PhoneNumber.Should().Be(string.Empty);
+        response.Data.PhoneNumber.Should().Be(string.Empty);
     }
 
     [Fact]
@@ -238,7 +241,7 @@ public class ParticipationsControllerTests : TestBase
             Email = request.Email,
             PhoneNumber = "",
             EventId = eventId,
-            Event = new Event { Id = eventId, Name = "Test Event", CreatedBy = "Bob@gmail.com" }
+            Event = new Event { Id = eventId, Name = "Test Event", CreatedBy = "Bob@gmail.com", StartTime = DateTime.UtcNow.AddDays(1) }
         };
 
         var registrationResult = ServiceResult<Participation>.SuccessResult
@@ -260,12 +263,12 @@ public class ParticipationsControllerTests : TestBase
         var result = await _controller.Participate(eventId, request);
 
         // Assert
-        result.Result.Should().BeOfType<OkObjectResult>();
-        var okResult = result.Result as OkObjectResult;
-        var response = okResult?.Value as ParticipationResponse;
+        result.Should().BeOfType<OkObjectResult>();
+        var okResult = result as OkObjectResult;
+        var response = okResult?.Value as ApiResponse<ParticipationResponse>;
 
-        response.Should().NotBeNull();
-        response?.PhoneNumber.Should().Be("");
+        response.Data.Should().NotBeNull();
+        response?.Data?.PhoneNumber.Should().Be("");
     }   
 
     [Fact]

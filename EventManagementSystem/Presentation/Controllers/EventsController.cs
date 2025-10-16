@@ -52,7 +52,7 @@ public class EventsController : ControllerBase
             _cacheHitCount++;
             _logger.LogInformation($"Request: {_requestCount}, Cache Hits: {_cacheHitCount}, Hit Rate: {(_cacheHitCount * 100.0 / _requestCount)}");
             
-            (events, totalCount) = await _eventService.GetAllEventsAsync(pageNumber, pageSize);
+            (events, totalCount) = await _eventService.GetEventsAsync(pageNumber, pageSize);
             cachedMemory = _mapper.Map<IEnumerable<EventResponse>>(events);
 
             var cacheOptions = new MemoryCacheEntryOptions()

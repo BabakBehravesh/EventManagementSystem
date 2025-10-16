@@ -17,6 +17,7 @@ public abstract class TestBase
         var config = new MapperConfiguration(cfg =>
         {
             cfg.AddProfile<ParticipationMappingProfile>();
+            cfg.AddProfile<EventMappingProfile>();
         });
         Mapper = config.CreateMapper();
     }
