@@ -45,12 +45,21 @@ public class ParticipationService : IParticipationService
         return ServiceResult<Participation>.SuccessResult(participation, "Registered successfully!");
     }
 
-    public async Task<IEnumerable<Participation>> GetParticipantsInEventAsync(int eventId)
+    public async Task<ServiceResult<IEnumerable<Participation>>> GetParticipantsInEventAsync(int eventId)
     {
-        return await _context.Participations
-            .Include(r => r.Event)
-            .Where(r => r.EventId == eventId)
-            .ToListAsync();
+        try
+        {
+            var participants = await _context.Participations
+                .Include(r => r.Event)
+                .Where(r => r.EventId == eventId)
+                .ToListAsync();
+
+            return ServiceResult<IEnumerable<Participation>>.SuccessResult(participants, $"Participants for event: {eventId} retrieved successfully!");
+        }
+        catch (Exception ex)
+        {
+            return ServiceResult<IEnumerable<Participation>>.FailureResult(ex.Message);
+        }
     }
 
     private async Task SendTicketAsEmailAsync(Participation participation)

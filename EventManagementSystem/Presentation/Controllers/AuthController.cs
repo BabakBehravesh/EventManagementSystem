@@ -30,37 +30,39 @@ public class AuthController : ControllerBase
 
     [Authorize(Roles = "Admin")]
     [HttpPost("register")]
-    public async Task<ActionResult<ApiResponse<UserInfo>>> Register([FromBody] RegisterRequest model)
+    public async Task<IActionResult> Register([FromBody] RegisterRequest model)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ApiResponse.ValidationFailure(ModelState.GetErrors()));
+            return ApiResponseFactory.ValidationFailure(ModelState.GetErrors());
         }
 
         var createdBy = await _userManager.GetUserAsync(User);
         
         if (createdBy == null)
         {
-            return BadRequest(ApiResponse.FailureResult("No valid creator information for this registration."));
+            return ApiResponseFactory.NotFound($"No valid creator information for this registration: {model.Email}");
         }
 
         var authResult = await _authService.RegisterAsync(model, createdBy);
 
-        if (authResult.Success)
+        if (!authResult.Success)
         {
-            return Ok(ApiResponse<UserInfo>.SuccessResult(authResult.Data, "User registered successfully!", StatusCodes.Status201Created));
+            return ApiResponseFactory.ServiceFailed(
+                $"User registeration failed in service {_authService.RegisterAsync}.", 
+                authResult.Errors.Any() ? authResult.Errors.ToArray() : [authResult.Message]);
         }
 
-        return BadRequest(ApiResponse<UserInfo>.FailureResult("User registeration failed!", authResult.Errors ?? [authResult.Message]));
+        return ApiResponseFactory.Created(authResult.Data, "User registered successfully!");
     }
 
     [Authorize]
     [HttpPost("change-password")]
-    public async Task<ActionResult<ApiResponse<UserInfo>>> ChangePassword([FromBody] ChangePasswordRequest model)
+    public async Task<IActionResult> ChangePasswordAsync([FromBody] ChangePasswordRequest model)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ApiResponse<UserInfo>.ValidationFailure(ModelState.GetErrors()));
+            return ApiResponseFactory.ValidationFailure(ModelState.GetErrors());
         }
 
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
@@ -68,90 +70,103 @@ public class AuthController : ControllerBase
         
         if (!result.Success)
         {
-            return BadRequest(ApiResponse<UserInfo>.FailureResult("Password change failed!", result.Errors ?? [result.Message]));
+            return ApiResponseFactory.ServiceFailed(
+                $"The service failed to change Password in: {nameof(_authService.ChangePasswordAsync)}.",
+                result.Errors.Any() ? result.Errors.ToArray() : [result.Message]);
         }
         
-        return Accepted(ApiResponse<UserInfo>.SuccessResult(result.Data, "Password changes successfully!", StatusCodes.Status202Accepted));
+        return ApiResponseFactory.Ok(result.Data, "Password changes successfully!");
     }
 
     [Authorize]
     [HttpGet("load-user-profile")]
-    public async Task<ActionResult<ApiResponse<UserInfo>>> LoadUserProfile()
+    public async Task<IActionResult> LoadUserProfile()
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ApiResponse<UserInfo>.ValidationFailure(ModelState.GetErrors()));
+            return ApiResponseFactory.ValidationFailure(ModelState.GetErrors());
         }
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         
         if (userId == null)
         {
-            return BadRequest(ApiResponse.FailureResult("User ID not found."));
+            return ApiResponseFactory.NotFound("User ID not found.");
         }
 
         var result = await _authService.LoadUserProfileAsync(userId);
 
-        if (result.Success)
+        if (!result.Success)
         {
-            return Ok(ApiResponse<UserInfo>.SuccessResult(result!.Data));
+            return ApiResponseFactory.ServiceFailed(
+                $"Service Failed: {nameof(_authService.LoadUserProfileAsync)}", 
+                result.Errors.Any() ? result.Errors.ToArray() : [result.Message]
+            );
         }
 
-        return BadRequest(ApiResponse.FailureResult(nameof(_authService.LoadUserProfileAsync), result.Errors ?? [result.Message]));
+        return ApiResponseFactory.Ok(result!.Data);
     }
 
     [Authorize]
     [HttpPut("change-user-profile")]
-    public async Task<ActionResult<ApiResponse<UserInfo>>> ChangeUserProfile([FromBody] UserProfileRequest model)
+    public async Task<IActionResult> ChangeUserProfile([FromBody] UserProfileRequest model)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ApiResponse.ValidationFailure(ModelState.GetErrors()));
+            return ApiResponseFactory.ValidationFailure(ModelState.GetErrors());
         }
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
         var result = await _authService.ChangeUserProfileAsync(userId, model);
-        
-        if (result.Success)
+        if (!result.Success)
         {
-            return Ok(ApiResponse<UserInfo>.SuccessResult(result.Data, "User profile changes successfully!", StatusCodes.Status202Accepted));
+            return ApiResponseFactory.ServiceFailed(
+                $"The sevice failed in: {nameof(_authService.ChangeUserProfileAsync)}", 
+                result.Errors.Any() ? result.Errors.ToArray() : [result.Message]);
         }
-        return BadRequest(ApiResponse.FailureResult(nameof(_authService.ChangeUserProfileAsync), result.Errors ?? [result.Message]));
+
+        return ApiResponseFactory.Ok(result.Data, $"User profile with name: {string.Join(" ", model.FirstName, model.LastName)} changes successfully!");
+
     }
 
     [Authorize("Admin")]
     [HttpDelete]
-    public async Task<ActionResult<ApiResponse<UserInfo>>> DeleteUser([FromQuery] string userId)
+    public async Task<IActionResult> DeleteUser([FromQuery] string userId)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ApiResponse.ValidationFailure(ModelState.GetErrors()));
+            return ApiResponseFactory.ValidationFailure(ModelState.GetErrors());
         }
+        
         var result = await _authService.DeleteUserAsync(userId);
-        if (result.Success)
+        if (!result.Success)
         {
-            return Ok(ApiResponse<UserInfo>.SuccessResult(result.Data));
+            return ApiResponseFactory.ServiceFailed(
+                $"The service failedin: {nameof(_authService.DeleteUserAsync)}", 
+                result.Errors.Any() ? result.Errors.ToArray() : [result.Message]);
         }
-        return BadRequest(ApiResponse<UserInfo>.FailureResult(nameof(_authService.DeleteUserAsync), result.Errors ?? [result.Message]));
+
+        return ApiResponseFactory.Ok(result.Data);
     }
 
     [AllowAnonymous]
     [HttpPost("login")]
-    public async Task<ActionResult<ApiResponse<UserInfo>>> Login([FromBody] LoginRequest model)
+    public async Task<IActionResult> Login([FromBody] LoginRequest model)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ApiResponse.ValidationFailure(ModelState.GetErrors()));
+            return ApiResponseFactory.ValidationFailure(ModelState.GetErrors());
         }
 
         if (User.Identity.IsAuthenticated)
         { 
-            return BadRequest(ApiResponse.FailureResult("The user is already authenticated."));
+            return ApiResponseFactory.BadRequest("The authenticated user cannot be authenticated again!");
         }
         
         var user = await _userManager.FindByEmailAsync(model.Email);
 
         if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
         {
-            return Unauthorized(ApiResponse.FailureResult("Invalid login attempt."));
+            return ApiResponseFactory.UnAuthorized("Invalid login attempt.");
         }
 
         var roles = await _userManager.GetRolesAsync(user);

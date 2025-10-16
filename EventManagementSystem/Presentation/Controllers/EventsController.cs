@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using EventManagementSystem.Application.DTOs;
+using EventManagementSystem.Application.Services;
 using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Domain.Models;
 using EventManagementSystem.Presentation.DTOs;
@@ -34,22 +35,24 @@ public class EventsController : ControllerBase
     [HttpGet]
     [ResponseCache(Location = ResponseCacheLocation.Any , Duration = 60)]
     [Authorize]
-    public async Task<ActionResult<ApiResponse<IEnumerable<EventResponse>>>> GetEventsAsync()
+    public async Task<IActionResult> GetEventsAsync(int pageNumber = 1, int pageSize = 10)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ApiResponse.ValidationFailure(ModelState.GetErrors())); 
+            return ApiResponseFactory.ValidationFailure(ModelState.GetErrors()); 
         }
 
         _requestCount++;
-        var cacheKey = "all_events_key";
+        var cacheKey = $"events_in_pageNumber:{pageNumber}_pageSize:{pageSize}";
+        IEnumerable<Event> events;
+        int totalCount = 0;
 
         if(!_memoryCache.TryGetValue(cacheKey, out IEnumerable<EventResponse> cachedMemory))
         {
             _cacheHitCount++;
             _logger.LogInformation($"Request: {_requestCount}, Cache Hits: {_cacheHitCount}, Hit Rate: {(_cacheHitCount * 100.0 / _requestCount)}");
             
-            var events = await _eventService.GetAllEventsAsync();
+            (events, totalCount) = await _eventService.GetAllEventsAsync(pageNumber, pageSize);
             cachedMemory = _mapper.Map<IEnumerable<EventResponse>>(events);
 
             var cacheOptions = new MemoryCacheEntryOptions()
@@ -60,60 +63,66 @@ public class EventsController : ControllerBase
             _memoryCache.Set(cacheKey, cachedMemory, cacheOptions);
         }
 
-        return Ok(ApiResponse<IEnumerable<EventResponse>>.SuccessResult(cachedMemory));
+        return ApiResponseFactory.PagedOk(cachedMemory, pageNumber, pageSize, totalCount, "Fetched successfully!");
     }
 
     [HttpGet("{eventId:int}", Name = "GetEventByIdAsync")]
     [Authorize]
-    public async Task<ActionResult<ApiResponse<EventResponse>>> GetEventByIdAsync(int eventId)
+    public async Task<IActionResult> GetEventByIdAsync(int eventId)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ApiResponse.ValidationFailure(ModelState.GetErrors()));
+            return ApiResponseFactory.ValidationFailure(ModelState.GetErrors());
         }
 
-        var eventObject = await _eventService.GetEventByIdAsync(eventId);
-        if (eventObject == null)
-            return NotFound(ApiResponse<EventResponse>.FailureResult("EventId not found"));
+        var serviceResult = await _eventService.GetEventByIdAsync(eventId);
 
-        var eventResponse = _mapper.Map<EventResponse>(eventObject.Data);
-        return Ok(ApiResponse<EventResponse>.SuccessResult(eventResponse));
+        if (!serviceResult.Success)
+        {
+            return ApiResponseFactory.ServiceFailed(
+                $"The service failed in: {_eventService.GetEventByIdAsync}.",
+                serviceResult.Errors.Any() ? serviceResult.Errors.ToArray() : [serviceResult.Message]);
+        }
+
+        if (serviceResult.Data == null)
+        { 
+            return ApiResponseFactory.NotFound($"EventId: {eventId} is not found.");
+        }
+
+        var eventResponse = _mapper.Map<EventResponse>(serviceResult.Data);
+        return ApiResponseFactory.Ok(eventResponse);
     }
 
     [HttpPost]
     [Authorize(Roles = "EventCreator")]
-    public async Task<ActionResult<ApiResponse<EventResponse>>> CreateEventAsync(EventRequest newEvent)
+    public async Task<IActionResult> CreateEventAsync(EventRequest newEvent)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ApiResponse.ValidationFailure(ModelState.GetErrors()));
+            return ApiResponseFactory.ValidationFailure(ModelState.GetErrors());
         }
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (string.IsNullOrEmpty(userId))
         {
-            return Unauthorized(ApiResponse.FailureResult("User identity is invalid or not found."));
+            return ApiResponseFactory.UnAuthorized("User identity is invalid or not found.");
         }
 
-        try
+        var eventEntity = _mapper.Map<Event>(newEvent);
+
+        var serviceResult = await _eventService.CreateEventAsync(eventEntity, userId!);
+
+        if (!serviceResult.Success)
         {
-            var eventEntity = _mapper.Map<Event>(newEvent);
-
-            var createdEvent = await _eventService.CreateEventAsync(eventEntity, userId!);
-
-            var eventResponse = _mapper.Map<EventResponse>(createdEvent.Data);
-
-            return CreatedAtAction(
-                null,
-                ApiResponse<EventResponse>.SuccessResult(
-                    eventResponse,
-                    "Event created successfully")
-            );
+            return ApiResponseFactory.ServiceFailed(
+                $"The service failed in: {_eventService.CreateEventAsync}.",
+                serviceResult.Errors.Any() ? serviceResult.Errors.ToArray() : [serviceResult.Message]);
         }
-        catch (Exception ex)
-        {
-            return BadRequest(ApiResponse.FailureResult(ex.Message));
-        }
+
+        var eventResponse = _mapper.Map<EventResponse>(serviceResult.Data);
+
+        return ApiResponseFactory.Created(eventResponse, $"EventId: {eventResponse.Id} created successfully!");
     }
 }
+

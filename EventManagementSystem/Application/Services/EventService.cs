@@ -16,11 +16,22 @@ public class EventService : IEventService
         _context = context;
     }
 
-    public async Task<IEnumerable<Event>> GetAllEventsAsync()
+    public async Task<(IEnumerable<Event>, int)> GetAllEventsAsync(int pageNumber, int pageSize)
     {
-        return await _context.Events
+        if (pageNumber <= 0) pageNumber = 1;
+        if (pageSize <= 0) pageSize = 10;
+
+        var query = _context.Events.AsQueryable();
+
+        var totalCount = await query.CountAsync();
+
+        var events = await query
             .AsNoTracking()
+            .Skip((pageNumber -1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
+
+        return (events, totalCount);
     }
 
     public async Task<ServiceResult<Event>> GetEventByIdAsync(int eventId)

@@ -25,43 +25,49 @@ public class ParticipationsController : ControllerBase
 
     [HttpGet]
     [Authorize(Roles = "EventCreator")] 
-    public async Task<ActionResult<ApiResponse<IEnumerable<ParticipationResponse>>>> GetParticipantsInEvent(int eventId)
+    public async Task<IActionResult> GetParticipantsInEvent(int eventId)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ApiResponse<IEnumerable<ParticipationResponse>>.ValidationFailure(ModelState.GetErrors()));
+            return ApiResponseFactory.ValidationFailure(ModelState.GetErrors());
         }
 
         var participants = await _registrationService.GetParticipantsInEventAsync(eventId);
 
-        if(participants == null || !participants.Any())
+        var participantsData = participants.Data;
+
+        if(participantsData == null || !participantsData.Any())
         { 
-            return NotFound(ApiResponse<IEnumerable<ParticipationResponse>>.FailureResult("No participants found for the given eventId"));
+            return ApiResponseFactory.NotFound("No participants found for the given eventId");
         }
 
-        var result =_mapper.Map<IEnumerable<ParticipationResponse>>(participants);
+        var result =_mapper.Map<IEnumerable<ParticipationResponse>>(participantsData);
 
-        return Ok(ApiResponse<IEnumerable<ParticipationResponse>>.SuccessResult(result));
+        return ApiResponseFactory.Ok(result);
     }
 
     [HttpPost]
     [Authorize(Roles = "EventParticipant")]
-    public async Task<ActionResult<ApiResponse<ParticipationResponse>>> Participate(int eventId, [FromBody] ParticipationRequest request)
+    public async Task<IActionResult> Participate(int eventId, [FromBody] ParticipationRequest request)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ApiResponse<ParticipationResponse>.ValidationFailure(ModelState.GetErrors()));
+            return ApiResponseFactory.ValidationFailure(ModelState.GetErrors());
         }
 
         var registrationEntity = _mapper.Map<Participation>(request);
 
         var participationResult = await _registrationService.ParticipateInEventAsync(eventId, registrationEntity);
 
-        if (!participationResult.Success) return BadRequest(ApiResponse.FailureResult(nameof(ParticipationService.ParticipateInEventAsync), participationResult.Errors));
-
+        if (!participationResult.Success)
+        { 
+            return ApiResponseFactory.ServiceFailed(
+                $"The sevice failed in: {nameof(ParticipationService.ParticipateInEventAsync)}", 
+                participationResult.Errors.Any() ? participationResult.Errors.ToArray() : [participationResult.Message]);
+        }
 
         var result = _mapper.Map<ParticipationResponse>(participationResult.Data);
 
-        return Ok(ApiResponse<ParticipationResponse>.SuccessResult(result));
+        return ApiResponseFactory.Ok(result);
     }
 }

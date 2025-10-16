@@ -5,7 +5,7 @@ namespace EventManagementSystem.Domain.Interfaces;
 
 public interface IEventService
 {
-    Task<IEnumerable<Event>> GetAllEventsAsync();
+    Task<(IEnumerable<Event>, int)> GetAllEventsAsync(int pageNumber, int pageSize);
 
     Task<ServiceResult<Event>> GetEventByIdAsync(int eventId);
 
