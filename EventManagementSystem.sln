@@ -7,9 +7,23 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventManagementSystem", "Ev
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{18A16F40-0CB9-4595-8DA7-6CF6E17FE849}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventManagementSystem.UnitTests", "EventManagementSystem.UnitTests\EventManagementSystem.UnitTests.csproj", "{E7C1DE2B-150B-4903-AD03-14E0FB80D0A1}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PerformanceTests-JMeter", "PerformanceTests-JMeter", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\Users\Babak\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin\ASP.NET Core Performance Test.jmx = ..\..\Users\Babak\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin\ASP.NET Core Performance Test.jmx
+		..\..\Users\Babak\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin\HTTP Request - Create Event POST.jmx = ..\..\Users\Babak\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin\HTTP Request - Create Event POST.jmx
+		..\..\Users\Babak\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin\JWTTokenTestPlan.jmx = ..\..\Users\Babak\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin\JWTTokenTestPlan.jmx
+		..\..\Users\Babak\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin\PostWithAutoToken.jmx = ..\..\Users\Babak\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin\PostWithAutoToken.jmx
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventManagementSystem.IntegrationTests", "EventManagementSystem.IntegrationTests\EventManagementSystem.IntegrationTests.csproj", "{9F74F7C7-1D8E-4FED-8285-2C6D761FAD79}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Data", "Data", "{C13CAF26-EE62-4763-9D7F-2605B3114132}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\Users\Babak\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin\data\events.csv = ..\..\Users\Babak\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin\data\events.csv
+		..\..\Users\Babak\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin\data\event_ids.csv = ..\..\Users\Babak\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin\data\event_ids.csv
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventManagementSystem.UnitTests", "Tests\EventManagementSystem.UnitTests\EventManagementSystem.UnitTests.csproj", "{1C4D355A-C2EA-0A07-B47A-91AC3E144A3E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventManagementSystem.IntegrationTests", "Tests\EventManagementSystem.IntegrationTests\EventManagementSystem.IntegrationTests.csproj", "{2547EA4E-1367-941E-7BED-7A333F5F7C69}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,20 +35,22 @@ Global
 		{ABDB53BD-A952-46F5-9EC1-067D2518D857}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ABDB53BD-A952-46F5-9EC1-067D2518D857}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ABDB53BD-A952-46F5-9EC1-067D2518D857}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E7C1DE2B-150B-4903-AD03-14E0FB80D0A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E7C1DE2B-150B-4903-AD03-14E0FB80D0A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E7C1DE2B-150B-4903-AD03-14E0FB80D0A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E7C1DE2B-150B-4903-AD03-14E0FB80D0A1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9F74F7C7-1D8E-4FED-8285-2C6D761FAD79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9F74F7C7-1D8E-4FED-8285-2C6D761FAD79}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9F74F7C7-1D8E-4FED-8285-2C6D761FAD79}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9F74F7C7-1D8E-4FED-8285-2C6D761FAD79}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C4D355A-C2EA-0A07-B47A-91AC3E144A3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C4D355A-C2EA-0A07-B47A-91AC3E144A3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C4D355A-C2EA-0A07-B47A-91AC3E144A3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C4D355A-C2EA-0A07-B47A-91AC3E144A3E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2547EA4E-1367-941E-7BED-7A333F5F7C69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2547EA4E-1367-941E-7BED-7A333F5F7C69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2547EA4E-1367-941E-7BED-7A333F5F7C69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2547EA4E-1367-941E-7BED-7A333F5F7C69}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{E7C1DE2B-150B-4903-AD03-14E0FB80D0A1} = {18A16F40-0CB9-4595-8DA7-6CF6E17FE849}
-		{9F74F7C7-1D8E-4FED-8285-2C6D761FAD79} = {18A16F40-0CB9-4595-8DA7-6CF6E17FE849}
+		{02EA681E-C7D8-13C7-8484-4AC65E1B71E8} = {18A16F40-0CB9-4595-8DA7-6CF6E17FE849}
+		{C13CAF26-EE62-4763-9D7F-2605B3114132} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{1C4D355A-C2EA-0A07-B47A-91AC3E144A3E} = {18A16F40-0CB9-4595-8DA7-6CF6E17FE849}
+		{2547EA4E-1367-941E-7BED-7A333F5F7C69} = {18A16F40-0CB9-4595-8DA7-6CF6E17FE849}
 	EndGlobalSection
 EndGlobal

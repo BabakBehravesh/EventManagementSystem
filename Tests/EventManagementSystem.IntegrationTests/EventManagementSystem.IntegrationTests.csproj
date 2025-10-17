@@ -18,10 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EventManagementSystem\EventManagementSystem.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
 
@@ -29,11 +25,8 @@
     <Folder Include="Application\Fakes\" />
   </ItemGroup>
 
-  <Target Name="CopyAppDeps" AfterTargets="Build">
-    <ItemGroup>
-      <AppDepsFile Include="..\EventManagementSystem\bin\$(Configuration)\net9.0\EventManagementSystem.deps.json" />
-    </ItemGroup>
-    <Copy SourceFiles="@(AppDepsFile)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
-  </Target>
+  <ItemGroup>
+    <ProjectReference Include="..\..\EventManagementSystem\EventManagementSystem.csproj" />
+  </ItemGroup>
 
 </Project>
