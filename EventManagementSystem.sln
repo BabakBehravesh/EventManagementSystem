@@ -9,16 +9,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{18A16F40
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PerformanceTests-JMeter", "PerformanceTests-JMeter", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 	ProjectSection(SolutionItems) = preProject
-		..\..\Users\Babak\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin\ASP.NET Core Performance Test.jmx = ..\..\Users\Babak\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin\ASP.NET Core Performance Test.jmx
-		..\..\Users\Babak\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin\HTTP Request - Create Event POST.jmx = ..\..\Users\Babak\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin\HTTP Request - Create Event POST.jmx
-		..\..\Users\Babak\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin\JWTTokenTestPlan.jmx = ..\..\Users\Babak\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin\JWTTokenTestPlan.jmx
-		..\..\Users\Babak\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin\PostWithAutoToken.jmx = ..\..\Users\Babak\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin\PostWithAutoToken.jmx
+		ASP.NET Core Performance Test.jmx = ASP.NET Core Performance Test.jmx
+		HTTP Request- Create EVENT POST.jmx = HTTP Request- Create EVENT POST.jmx
+		JWTTokenTestPlam.jmx = JWTTokenTestPlam.jmx
+		PostWithAutoToken.jmx = PostWithAutoToken.jmx
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Data", "Data", "{C13CAF26-EE62-4763-9D7F-2605B3114132}"
 	ProjectSection(SolutionItems) = preProject
-		..\..\Users\Babak\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin\data\events.csv = ..\..\Users\Babak\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin\data\events.csv
-		..\..\Users\Babak\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin\data\event_ids.csv = ..\..\Users\Babak\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin\data\event_ids.csv
+		events.csv = events.csv
+		event_ids.csv = event_ids.csv
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventManagementSystem.UnitTests", "Tests\EventManagementSystem.UnitTests\EventManagementSystem.UnitTests.csproj", "{1C4D355A-C2EA-0A07-B47A-91AC3E144A3E}"
@@ -52,5 +52,8 @@ Global
 		{C13CAF26-EE62-4763-9D7F-2605B3114132} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{1C4D355A-C2EA-0A07-B47A-91AC3E144A3E} = {18A16F40-0CB9-4595-8DA7-6CF6E17FE849}
 		{2547EA4E-1367-941E-7BED-7A333F5F7C69} = {18A16F40-0CB9-4595-8DA7-6CF6E17FE849}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CCCFBCF8-C73D-4BC5-A0D3-A46C1A38C56C}
 	EndGlobalSection
 EndGlobal
