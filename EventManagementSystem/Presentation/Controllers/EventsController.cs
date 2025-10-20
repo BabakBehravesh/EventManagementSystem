@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using EventManagementSystem.Application.DTOs;
-using EventManagementSystem.Application.Services;
 using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Domain.Models;
 using EventManagementSystem.Presentation.DTOs;
@@ -9,6 +8,7 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using System.Security.Claims;
+
 
 namespace EventManagementSystem.Controllers;
 
@@ -90,6 +90,8 @@ public class EventsController : ControllerBase
         }
 
         var eventResponse = _mapper.Map<EventResponse>(serviceResult.Data);
+        _logger.LogInformation($"Event information with Id: {eventId} returned successfully.");
+
         return ApiResponseFactory.Ok(eventResponse);
     }
 

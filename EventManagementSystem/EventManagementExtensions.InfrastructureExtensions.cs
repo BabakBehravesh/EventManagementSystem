@@ -6,6 +6,7 @@ using EventManagementSystem.Infrastructure.QrCode;
 using EventManagementSystem.Infrastructure.Security;
 using EventManagementSystem.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 public static class InfrastructureExtensions
 {
@@ -15,7 +16,7 @@ public static class InfrastructureExtensions
     {
         // Database
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
+            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
         // Security - Singletons
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
@@ -26,6 +27,8 @@ public static class InfrastructureExtensions
 
         // Infrastructure Services - Transient
         services.AddTransient<IEmailMessageBuilder, EmailMessageBuilder>();
+
+        Log.Information("Configured Infrastructure Services.");
 
         return services;
     }

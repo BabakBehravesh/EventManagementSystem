@@ -1,8 +1,17 @@
 using EventManagementSystem;
 using EventManagementSystem.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 builder.Services.AddMemoryCache();
 
@@ -43,8 +52,7 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex)
     {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while initializing the database.");
+        Log.Error(ex, "An error occurred while migrating or initializing the database.");
     }
 }
 
