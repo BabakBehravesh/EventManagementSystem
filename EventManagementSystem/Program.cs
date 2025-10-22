@@ -57,7 +57,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Middleware Pipeline
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
