@@ -1,4 +1,6 @@
-﻿namespace EventManagementSystem.Application.DTOs.Auth;
+﻿using EventManagementSystem.Application.Types;
+
+namespace EventManagementSystem.Application.DTOs.Auth;
 
 public class UserInfo
 {
@@ -12,7 +14,7 @@ public class UserInfo
 
     public string? LastName { get; set; }
 
-    public List<string> Roles { get; set; } = new List<string>();
+    public RoleType Roles { get; set; } = RoleType.None;
 
     public bool EmailConfirmed { get; set; }
 

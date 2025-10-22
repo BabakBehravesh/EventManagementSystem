@@ -15,5 +15,5 @@ public record RegisterRequest
     public required string Email { get; set; }
 
     [Required]
-    public required Collection<RoleType> UserRoles { get; set; } = [];
+    public required RoleType UserRoles { get; set; } = RoleType.EventParticipant;
 }

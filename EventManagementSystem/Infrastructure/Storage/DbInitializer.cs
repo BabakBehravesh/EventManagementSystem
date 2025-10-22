@@ -21,7 +21,8 @@ public class DbInitializer(
         _logger.LogInformation("Starting database initialization...");
         _logger.LogInformation("Creating roles database initialization...");
 
-        string[] roleNames = Enum.GetNames(typeof(RoleType));
+        string[] roleNames = [..Enum.GetNames<RoleType>()
+                                .Where(roleName => roleName != RoleType.None.ToString())];
         foreach (var roleName in roleNames)
         {
             if (!await _roleManager.RoleExistsAsync(roleName))

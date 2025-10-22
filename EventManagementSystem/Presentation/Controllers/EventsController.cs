@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using EventManagementSystem.Application.DTOs;
+using EventManagementSystem.Application.Filters;
+using EventManagementSystem.Application.Types;
 using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Domain.Models;
 using EventManagementSystem.Presentation.DTOs;
@@ -96,7 +98,7 @@ public class EventsController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "EventCreator")]
+    [AuthorizeRole(RoleType.EventCreator)]
     public async Task<IActionResult> CreateEventAsync(EventRequest newEvent)
     {
         if (!ModelState.IsValid)

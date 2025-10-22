@@ -2,7 +2,9 @@
 
 using AutoMapper;
 using EventManagementSystem.Application.DTOs;
+using EventManagementSystem.Application.Filters;
 using EventManagementSystem.Application.Services;
+using EventManagementSystem.Application.Types;
 using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Domain.Models;
 using EventManagementSystem.Presentation.DTOs;
@@ -24,7 +26,7 @@ public class ParticipationsController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Roles = "EventCreator")] 
+    [AuthorizeRole(RoleType.EventCreator)] 
     public async Task<IActionResult> GetParticipantsInEvent(int eventId)
     {
         if (!ModelState.IsValid)
@@ -47,7 +49,7 @@ public class ParticipationsController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "EventParticipant")]
+    [AuthorizeRole(RoleType.EventParticipant)]
     public async Task<IActionResult> Participate(int eventId, [FromBody] ParticipationRequest request)
     {
         if (!ModelState.IsValid)

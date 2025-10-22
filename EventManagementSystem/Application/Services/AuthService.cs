@@ -1,5 +1,6 @@
 ﻿using EventManagementSystem.Application.DTOs;
 using EventManagementSystem.Application.DTOs.Auth;
+using EventManagementSystem.Application.Types;
 using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Domain.Models;
 using Microsoft.AspNetCore.Identity;
@@ -57,10 +58,7 @@ public class AuthService : IAuthService
                 return ServiceResult<UserInfo>.FailureResult("Failed to create user.", result.Errors.Select(err => err.Description.ToString()).ToList());
             }
 
-            foreach (var role in request.UserRoles)
-            {
-                await _userManager.AddToRoleAsync(user, role.ToString());
-            }
+            await AddRolesFromFlagsAsync(user, request.UserRoles);
 
             await _emailService.SendAccountCreatedEmailAsync(user.Email, user.UserName, password);
             await _emailService.SendWelcomeEmailAsync(user.Email, user.UserName);
@@ -74,7 +72,7 @@ public class AuthService : IAuthService
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = user.Email,
-                Roles = [.. request.UserRoles.Select(r => r.ToString())]
+                Roles = request.UserRoles
             };
 
             return ServiceResult<UserInfo>.SuccessResult(userInfo, "User registered successfully!");
@@ -84,6 +82,80 @@ public class AuthService : IAuthService
             _logger.LogError(ex, $"Error registering user {request.Email}");
             return ServiceResult<UserInfo>.FailureResult("An error occurred while registering the user.");
         }
+    }
+
+    private async Task AddRolesFromFlagsAsync(ApplicationUser user, RoleType roleFlags)
+    {
+        foreach (var role in GetIndividualRoles(roleFlags))
+        {
+            // Ensure role exists in database
+            if (!await _roleManager.RoleExistsAsync(role.ToString()))
+            {
+                await _roleManager.CreateAsync(new IdentityRole(role.ToString()));
+            }
+
+            await _userManager.AddToRoleAsync(user, role.ToString());
+        }
+    }
+
+    private IEnumerable<RoleType> GetIndividualRoles(RoleType roleFlags)
+    {
+        return Enum.GetValues(typeof(RoleType))
+            .Cast<RoleType>()
+            .Where(role => role != RoleType.None && roleFlags.HasRole(role));
+    }
+
+
+    public async Task<ServiceResult<UserInfo>> UpdateUserRolesAsync(string userId, RoleType newRoles)
+    {
+        try
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return ServiceResult<UserInfo>.FailureResult("User not found.");
+            }
+
+            // Get current roles
+            var currentRoles = await _userManager.GetRolesAsync(user);
+
+            // Remove all current roles
+            foreach (var role in currentRoles)
+            {
+                await _userManager.RemoveFromRoleAsync(user, role);
+            }
+
+            // Add new roles from flags
+            await AddRolesFromFlagsAsync(user, newRoles);
+
+            _logger.LogInformation($"Updated roles for user {user.Email} to: {string.Join(", ", GetIndividualRoles(newRoles).Select(r => r.ToString()))}");
+
+            UserInfo userInfo = new()
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                Roles = newRoles
+            };
+
+            return ServiceResult<UserInfo>.SuccessResult(userInfo, "User roles updated successfully!");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error updating roles for user {userId}");
+            return ServiceResult<UserInfo>.FailureResult("An error occurred while updating user roles.");
+        }
+    }
+
+    public async Task<RoleType> GetUserRoleFlagsAsync(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null) return RoleType.None;
+
+        var roles = await _userManager.GetRolesAsync(user);
+        return roles
+            .Select(role => Enum.Parse<RoleType>(role))
+            .Aggregate(RoleType.None, (current, role) => current | role);
     }
 
     public async Task<ServiceResult<UserInfo>> ChangePasswordAsync(string userId, ChangePasswordRequest request)
@@ -203,15 +275,15 @@ public class AuthService : IAuthService
         if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
             return ServiceResult<UserInfo>.FailureResult("Invalid login attempt.");
 
-        var roles = await _userManager.GetRolesAsync(user);
-        var token = _jwtTokenGenerator.GenerateToken(user, roles);
+        var roles = await GetUserRoleFlagsAsync(user.Id);
+        var token = _jwtTokenGenerator.GenerateToken(user, roles.ToStringArray());
 
         UserInfo userInfo = new()
         {
             FirstName = user.FirstName,
             LastName = user.LastName,
             Email = user.Email,
-            Roles = roles.ToList(),
+            Roles = roles,
         }; 
 
         return ServiceResult<UserInfo>.AuthSuccessResult(userInfo, token, "Login successful!");

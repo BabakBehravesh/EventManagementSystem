@@ -5,6 +5,8 @@ using EventManagementSystem.Presentation.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using EventManagementSystem.Application.Filters;
+using EventManagementSystem.Application.Types;
 
 namespace EventManagementSystem.Controllers;
 
@@ -28,7 +30,7 @@ public class AuthController : ControllerBase
         _authService = authService;
     }
 
-    [Authorize(Roles = "Admin")]
+    [AuthorizeRole(RoleType.Admin)]
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest model)
     {
@@ -128,7 +130,7 @@ public class AuthController : ControllerBase
 
     }
 
-    [Authorize("Admin")]
+    [AuthorizeRole(RoleType.Admin)]
     [HttpDelete]
     public async Task<IActionResult> DeleteUser([FromQuery] string userId)
     {
@@ -172,6 +174,17 @@ public class AuthController : ControllerBase
         var roles = await _userManager.GetRolesAsync(user);
         var token = _jwtTokenGenerator.GenerateToken(user, roles);
 
-        return Ok(ApiResponse<UserInfo>.AuthSuccessResult(new UserInfo { FirstName = user.FirstName, LastName = user.LastName, Email = user.Email, Roles = roles.ToList() }, token, "Login successful!"));
+        return Ok(
+            ApiResponse<UserInfo>.AuthSuccessResult(
+                new UserInfo 
+                { 
+                    FirstName = user.FirstName, 
+                    LastName = user.LastName, 
+                    Email = user.Email, 
+                    Roles = RoleTypeExtensions.FromStringArray(roles.ToArray()) 
+                }, 
+                token, 
+                "Login successful!")
+            );
     }
 }
