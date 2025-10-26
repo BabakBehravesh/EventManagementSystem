@@ -13,16 +13,23 @@ public class AuthorizeRoleAttribute(RoleType requiredRoles) : Attribute, IAuthor
     {
         var user = context.HttpContext.User;
 
-        var userRolesClaim = user.FindFirst(ClaimTypes.Role)?.Value;
-        if (string.IsNullOrEmpty(userRolesClaim))
+        var userRolesClaim = user.FindAll(ClaimTypes.Role)?.ToArray();
+        if (userRolesClaim == null || !userRolesClaim.Any())
+        {
+            context.Result = new ForbidResult();
+            return;
+        }
+        
+        var isNoneRole = Enum.TryParse<RoleType>(userRolesClaim.FirstOrDefault()?.Value, out var parsedRole) 
+                         && parsedRole == RoleType.None;
+
+        if (isNoneRole)
         {
             context.Result = new ForbidResult();
             return;
         }
 
-        var userRoles = userRolesClaim.Split(',')
-            .Select(role => Enum.Parse<RoleType>(role))
-            .Aggregate(RoleType.None, (current, role) => current | role);
+        var userRoles = RoleTypeExtensions.FromStringArray(userRolesClaim.Select(claim => claim.Value).ToArray());
 
         if (!userRoles.HasAnyRole(_requiredRoles))
         {

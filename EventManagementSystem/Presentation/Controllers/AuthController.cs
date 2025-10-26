@@ -1,12 +1,12 @@
 ﻿using EventManagementSystem.Application.DTOs.Auth;
+using EventManagementSystem.Application.Filters;
+using EventManagementSystem.Application.Types;
 using EventManagementSystem.Domain.Interfaces;
 using EventManagementSystem.Domain.Models;
 using EventManagementSystem.Presentation.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using EventManagementSystem.Application.Filters;
-using EventManagementSystem.Application.Types;
 
 namespace EventManagementSystem.Controllers;
 
@@ -186,5 +186,42 @@ public class AuthController : ControllerBase
                 token, 
                 "Login successful!")
             );
+    }
+
+    [AuthorizeRole(RoleType.Admin)]
+    [HttpPatch("update-user-roles")]
+    public async Task<IActionResult> UpdateUserRoles(UpdateRolesRequest request)
+    {
+        RoleType toBeAssignedRoles = (RoleType)request.Roles;
+
+        if (!toBeAssignedRoles.IsValid())
+        {
+            return ApiResponseFactory.ValidationFailure(["Invalid role combination provided."]);
+        }
+
+        var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+
+        if (userEmail == request.Email)
+        {
+            return ApiResponseFactory.Forbidden("The user cannot change his/her own roles");
+        }
+
+        var user = await _userManager.FindByEmailAsync(request.Email);
+        
+        if (user == null)
+        {
+            return ApiResponseFactory.NotFound($"No user found with email: {request.Email}");
+        }
+
+        var result = await _authService.UpdateUserRolesAsync(user.Id, toBeAssignedRoles);
+        
+        if (!result.Success)
+        {
+            return ApiResponseFactory.ServiceFailed(
+                $"The service failed in: {nameof(_authService.UpdateUserRolesAsync)}", 
+                result.Errors.Any() ? result.Errors.ToArray() : [result.Message]);
+        }
+
+        return ApiResponseFactory.Ok(result.Data, "User roles updated successfully!");
     }
 }

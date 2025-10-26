@@ -76,4 +76,14 @@ public static class RoleTypeExtensions
     {
         return userRoles == requiredRoles;
     }
+
+    public static bool IsValid(this RoleType userRole)
+    {
+        var allRoles = Enum
+            .GetValues<RoleType>()
+            .Aggregate(RoleType.None, (current, role) => current.AddRole(role));
+
+        return (userRole & ~allRoles) == RoleType.None;
+    }
+
 }
