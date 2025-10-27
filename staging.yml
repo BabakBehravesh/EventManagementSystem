@@ -1,0 +1,14 @@
+.deploy-staging: &deploy-staging
+  stage: deploy-staging
+  environment:
+    name: staging
+    url: https://eventmgmt-app-staging.azurewebsites.net
+  script:
+    - echo "Deploying Staging Environment"
+    - az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
+    - az account set --subscription $AZURE_SUBSCRIPTION_ID
+    - dotnet publish --configuration Release --output ./publish
+    - cd publish && zip -r ../publish.zip . && cd ..
+    - az webapp deployment source config-zip --resource-group "eventmgmt-rg-staging" --name "eventmgmt-app-staging" --src ./publish.zip
+  only:
+    - develop

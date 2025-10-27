@@ -1,0 +1,15 @@
+.deploy-production: &deploy-production
+  stage: deploy-production
+  environment:
+    name: production
+    url: https://eventmgmt-app-production.azurewebsites.net
+  script:
+    - echo "Deploying Production Environment"
+    - az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
+    - az account set --subscription $AZURE_SUBSCRIPTION_ID
+    - dotnet publish --configuration Release --output ./publish
+    - cd publish && zip -r ../publish.zip . && cd ..
+    - az webapp deployment source config-zip --resource-group "eventmgmt-rg-production" --name "eventmgmt-app-production" --src ./publish.zip
+  only:
+    - main
+  when: manual

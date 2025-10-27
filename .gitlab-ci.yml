@@ -1,38 +1,77 @@
-variables:
-  DOTNET_VERSION: '9.0'
-  NODE_VERSION: '18'
-  AZURE_KEY_VAULT_NAME: "eventmgmt-kv"
-  AZURE_REGION: "germanywestcentral"
+image: mcr.microsoft.com/dotnet/sdk:9.0
 
 stages:
-  - restore
   - build
   - test
-  - deploy
+  - security-scan
+  - deploy-staging
+  - deploy-production
+
+variables:
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  NUGET_CONFIG: '$CI_PROJECT_DIR/.nuget/NuGet/NuGet.Config'
+
+cache:
+  key: "$CI_COMMIT_REF_SLUG"
+  paths:
+    - .nuget/
+    - **/bin/
+    - **/obj/
+  policy: pull-push
 
 before_script:
   - dotnet --version
-  - node --version
-
-restore:
-  stage: restore
-  script:
-    - dotnet restore EventManagementSystem.sln
+  - dotnet restore
 
 build:
   stage: build
   script:
-    - dotnet build EventManagementSystem.sln --configuration Release --no-restore
-
-test:
-  stage: test
-  script:
-    - dotnet test EventManagementSystem.sln --configuration Release --no-build
-
-deploy:
-  stage: deploy
-  script:
-    - echo "Deploying to Azure..."
-    # Your deployment scripts here
+    - dotnet build --configuration Release --no-restore --verbosity minimal
+  artifacts:
+    paths:
+      - "**/bin/Release/"
+    expire_in: 1 week
   only:
     - main
+    - develop
+    - merge_requests
+
+unit-tests:
+  stage: test
+  script:
+    - dotnet test --configuration Release --no-build --verbosity normal --logger "trx" --results-directory "TestResults"
+  artifacts:
+    when: always
+    paths:
+      - "**/TestResults/**/*"
+    reports:
+      junit: "**/TestResults/*.trx"
+  dependencies:
+    - build
+  only:
+    - main
+    - develop
+    - merge_requests
+
+security-scan:
+  stage: security-scan
+  image: owasp/zap2docker-stable:latest
+  script:
+    - zap-baseline.py -t https://your-staging-app.azurewebsites.net -I -x security-report.xml
+  artifacts:
+    paths:
+      - security-report.xml
+    expire_in: 1 week
+  only:
+    - main
+  allow_failure: true
+
+include:
+  - local: '.gitlab/ci/staging.yml'
+  - local: '.gitlab/ci/production.yml'
+
+deploy-staging:
+  <<: *deploy-staging
+
+deploy-production:
+  <<: *deploy-production

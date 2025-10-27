@@ -28,6 +28,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".getlab-ci", ".getlab-ci", 
 		.gitlab-ci.yml = .gitlab-ci.yml
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ci", "ci", "{155638DF-C9DE-4C41-A481-5448F89C894B}"
+	ProjectSection(SolutionItems) = preProject
+		production.yml = production.yml
+		staging.yml = staging.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +61,7 @@ Global
 		{2547EA4E-1367-941E-7BED-7A333F5F7C69} = {18A16F40-0CB9-4595-8DA7-6CF6E17FE849}
 		{02EA681E-C7D8-13C7-8484-4AC65E1B71E8} = {18A16F40-0CB9-4595-8DA7-6CF6E17FE849}
 		{D2566B10-41D4-4193-B4DF-4A3642F16EA8} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{155638DF-C9DE-4C41-A481-5448F89C894B} = {84D27F74-D2BA-6C25-2661-968F101900D9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CCCFBCF8-C73D-4BC5-A0D3-A46C1A38C56C}
